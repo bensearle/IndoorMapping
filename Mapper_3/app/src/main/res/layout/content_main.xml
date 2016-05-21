@@ -231,7 +231,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="SSID"
-        android:id="@+id/outputSSID"
+        android:id="@+id/OutputSSID"
         android:layout_below="@+id/button1"
         android:layout_toEndOf="@+id/textView" />
 

@@ -14,6 +14,8 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -72,12 +74,43 @@ public class MainActivity extends AppCompatActivity {
 
     public List<ScanResult> WAPs; // list of wireless access points
 
+    public int testX;
+    public int testY;
+    public int testZ;
+
     public void AddPoint(View v){
 
+        Log.d("AddPoint","In  ("+testX+","+testY+","+testZ+")");
+
+        EditText viewX = (EditText) findViewById(R.id.InputX);
+        EditText viewY = (EditText) findViewById(R.id.InputY);
+        EditText viewZ = (EditText) findViewById(R.id.InputZ);
+
+        Integer inputX = Integer.parseInt(viewX.getText().toString());
+        Integer inputY = Integer.parseInt(viewY.getText().toString());
+        Integer inputZ = Integer.parseInt(viewZ.getText().toString());
+
+        testX = inputX;
+        testY = inputY;
+        testZ = inputZ;
+
+        Log.d("AddPoint","Out ("+testX+","+testY+","+testZ+")");
         //((Button) v).setText("executed");
     }
 
     public void GetPoint(View v){
+
+        Log.d("GetPoint","In  ("+testX+","+testY+","+testZ+")");
+
+        TextView ouputX = (TextView)findViewById(R.id.OutputX);
+        TextView ouputY = (TextView)findViewById(R.id.OutputY);
+        TextView ouputZ = (TextView)findViewById(R.id.OutputZ);
+
+        ouputX.setText(""+testX);
+        ouputY.setText(""+testY);
+        ouputZ.setText(""+testZ);
+
+        Log.d("GetPoint", "Out  (" + testX + "," + testY + "," + testZ + ")");
 
         //((Button) v).setText("executed");
     }
