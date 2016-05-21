@@ -32,7 +32,7 @@ public class Algorithms {
 
     }
 
-    public Point3D TriangleCentre (Point3D p1, Point3D p2, Point3D p3){
+    public void TriangleCentre (Point3D p1, Point3D p2, Point3D p3){
         Point3D center12 = new Point3D((p1.X+p2.X)/2, (p1.Y+p2.Y)/2, (p1.Z+p2.Z)/2);
         Point3D center13 = new Point3D((p1.X+p3.X)/2, (p1.Y+p3.Y)/2, (p1.Z+p3.Z)/2);
         Point3D center23 = new Point3D((p2.X+p3.X)/2, (p2.Y+p3.Y)/2, (p2.Z+p3.Z)/2);

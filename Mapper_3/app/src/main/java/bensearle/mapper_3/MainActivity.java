@@ -66,11 +66,21 @@ public class MainActivity extends AppCompatActivity {
      * All Ben Searle Code Below
      */
 
-    public WifiManager Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-    public WifiInfo WifiConnection = Wifi.getConnectionInfo();
-    public String ConnectedSSID = WifiConnection.getSSID(); // SSID of connected network
+    public WifiManager Wifi;// = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+    public WifiInfo WifiConnection;// = Wifi.getConnectionInfo();
+    public String ConnectedSSID;// = WifiConnection.getSSID(); // SSID of connected network
 
     public List<ScanResult> WAPs; // list of wireless access points
+
+    public void AddPoint(View v){
+
+        //((Button) v).setText("executed");
+    }
+
+    public void GetPoint(View v){
+
+        //((Button) v).setText("executed");
+    }
 
     public void button1_OnClick(View v) {
         // do something when the button is clicked
@@ -78,16 +88,16 @@ public class MainActivity extends AppCompatActivity {
         ((Button) v).setText("clicked");
 
 
+        /**
         boolean wifiEnabled = enableWifi();
-
 
         if(!wifiEnabled){
             // wifi is not enabled, do something
         } else {
             // wifi is enabled
-
         }
 
+        */
 
         ((Button) v).setText("sorted");
     }
@@ -101,11 +111,22 @@ public class MainActivity extends AppCompatActivity {
 
         if(Wifi.isWifiEnabled()) {
             // wifi enabled
+            Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+            WifiConnection = Wifi.getConnectionInfo();
+            ConnectedSSID = WifiConnection.getSSID(); // SSID of connected network
+
             return true;
         } else {
             Wifi.setWifiEnabled(true);
-            Wifi.isWifiEnabled();
-            return true;
+            if(Wifi.isWifiEnabled()){
+                Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+                WifiConnection = Wifi.getConnectionInfo();
+                ConnectedSSID = WifiConnection.getSSID(); // SSID of connected network
+                return true;
+
+            }
+            // wifi still not enabled
+            return false;
         }
     }
 
@@ -119,7 +140,6 @@ public class MainActivity extends AppCompatActivity {
 
         return WifiConnection.getSSID();
     }
-
 
     /**
      * do a new scan for WAPs and collate them
