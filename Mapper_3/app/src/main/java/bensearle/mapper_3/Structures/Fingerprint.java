@@ -13,6 +13,7 @@ import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.SortedMap;
 import java.util.SortedSet;
 import java.util.TreeMap;
@@ -115,6 +116,29 @@ public class Fingerprint {
         return topBSSID;
     }
 
+
+    public Object[][] GetWapArray(){
+        int n = 15; // top n WAPS
+        Object[][] waps = new String[n][2]; // 2 columns (bssid & rssi)
+
+        int[] topRSSI = new int[n]; // list of top RSSI
+        String[] topBSSID = new String[n]; // list of top BSSID
+
+        Map<String, Integer> sortedWaps = sortMap(WAPS); // sort the map
+
+        // get first n
+        int count = 0;
+        for(Iterator i = WAPS.entrySet().iterator(); i.hasNext();) { // iterate list of WAPs
+            if (count<n) {
+                Map.Entry item = (Map.Entry) i.next();
+                String bssid = (String) item.getKey();
+                Integer rssi = (Integer) item.getValue();
+                waps[count][0] = bssid;
+                waps[count][1] = rssi;
+            } else { break; }
+        }
+        return waps;
+    }
 
     /**
      * Does this fingerprint use these WAPS
