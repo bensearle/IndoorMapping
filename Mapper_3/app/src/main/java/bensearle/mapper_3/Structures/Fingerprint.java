@@ -89,6 +89,12 @@ public class Fingerprint {
         location.Z = z;
     }
 
+    public void SetPostion(Point3D p){
+        location.X = p.X;
+        location.Y = p.Y;
+        location.Z = p.Z;
+    }
+
     // get
     public Point3D GetPosition() { return location; }
     public Integer GetRSSI(String BSSID) { return WAPS.get(BSSID); };

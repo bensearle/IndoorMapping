@@ -22,6 +22,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import bensearle.mapper_3.Structures.Fingerprint;
+import bensearle.mapper_3.Structures.Point3D;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -74,65 +77,109 @@ public class MainActivity extends AppCompatActivity {
 
     public List<ScanResult> WAPs; // list of wireless access points
 
+    public static int EUCLIDEAN_DISTANCE_POINTS = 5; // how many points/WAPs to compare when calculating Euclidean distance
+
     public int testX;
     public int testY;
     public int testZ;
 
     public void AddPoint(View v){
-
         Log.d("AddPoint","In  ("+testX+","+testY+","+testZ+")");
 
+        // get the input fields
         EditText viewX = (EditText) findViewById(R.id.InputX);
         EditText viewY = (EditText) findViewById(R.id.InputY);
         EditText viewZ = (EditText) findViewById(R.id.InputZ);
 
-        Integer inputX = Integer.parseInt(viewX.getText().toString());
-        Integer inputY = Integer.parseInt(viewY.getText().toString());
-        Integer inputZ = Integer.parseInt(viewZ.getText().toString());
+        // Check that X,Y,Z have been inputted /not null
+        if(viewX.length()>0 && viewY.length()>0 && viewZ.length()>0 ){
+            // get the position values from the input text fields
+            Integer inputX = Integer.parseInt(viewX.getText().toString());
+            Integer inputY = Integer.parseInt(viewY.getText().toString());
+            Integer inputZ = Integer.parseInt(viewZ.getText().toString());
 
-        testX = inputX;
-        testY = inputY;
-        testZ = inputZ;
+            // create fingerprint with WAPs and position
+            Fingerprint fp = new Fingerprint(getWAPs());
+            fp.SetPostion(inputX,inputY,inputZ);
 
-        Log.d("AddPoint","Out ("+testX+","+testY+","+testZ+")");
-        //((Button) v).setText("executed");
+            // add fingerprint to database
+            // TO DO
+
+            // show acknowledgement to use that point has been added successfully
+            // TO DO
+
+            testX = inputX;
+            testY = inputY;
+            testZ = inputZ;
+            Log.d("AddPoint","Out ("+testX+","+testY+","+testZ+")");
+        } else {
+            // input of point not complete, must contain X,Y,Z
+        }
     }
 
     public void GetPoint(View v){
 
         Log.d("GetPoint","In  ("+testX+","+testY+","+testZ+")");
 
-        TextView ouputX = (TextView)findViewById(R.id.OutputX);
-        TextView ouputY = (TextView)findViewById(R.id.OutputY);
-        TextView ouputZ = (TextView)findViewById(R.id.OutputZ);
+        // create current fingerprint with WAPs
+        Fingerprint fp = new Fingerprint(getWAPs());
 
-        ouputX.setText(""+testX);
-        ouputY.setText(""+testY);
-        ouputZ.setText(""+testZ);
+        // get similar fingerprints of reference points (RP) from database
+        // RP fingerprints must have at least n WAPs the same as current fingerprint, n=EUCLIDEAN_DISTANCE_POINTS
+        // TO DECIDE: use top n WAPs of current fingerprint or any n fingerprints?
+        // TO DO
+
+        // get Euclidean distance between each RP fingerprint and current fingerprint
+        // TO DO
+
+        // localization algorithm: decreasing triangles
+        // use 3 closest RP
+        // TO DO
+
+        // localization algorithm: another one
+        // TO DO
+
+        // output estimated position
+        TextView outputX = (TextView)findViewById(R.id.OutputX);
+        TextView outputY = (TextView)findViewById(R.id.OutputY);
+        TextView outputZ = (TextView)findViewById(R.id.OutputZ);
+
+        outputX.setText(""+testX);
+        outputY.setText(""+testY);
+        outputZ.setText(""+testZ);
 
         Log.d("GetPoint", "Out  (" + testX + "," + testY + "," + testZ + ")");
 
         //((Button) v).setText("executed");
     }
 
-    public void button1_OnClick(View v) {
-        // do something when the button is clicked
-        Button button1 = (Button) v;
-        ((Button) v).setText("clicked");
+    /*
+     * Network Connectivity
+     */
+
+    /**
+     * Refresh the network to initialize/update network fields and get SSID
+     * @param v from button click
+     */
+    public void RefreshNetwork(View v){
+        Log.d("RefreshNetwork", "Start Refreshing Network");
+        Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+
+        if (enableWifi()){
+            WifiConnection = Wifi.getConnectionInfo();
+            ConnectedSSID = WifiConnection.getSSID(); // SSID of connected network
+            Log.d("RefreshNetwork", "Wifi: "+WifiConnection.toString());
+
+            TextView outputSSID = (TextView)findViewById(R.id.OutputSSID);
+            outputSSID.setText(""+outputSSID);
+            Log.d("RefreshNetwork", "Network Refreshed");
 
 
-        /**
-        boolean wifiEnabled = enableWifi();
-
-        if(!wifiEnabled){
-            // wifi is not enabled, do something
         } else {
-            // wifi is enabled
+            // no wifi network
+            Log.d("RefreshNetwork", "No Network");
+
         }
-
-        */
-
-        ((Button) v).setText("sorted");
     }
 
     /**
@@ -140,23 +187,13 @@ public class MainActivity extends AppCompatActivity {
      * @return true to signify that the wifi is enabled
      */
     private boolean enableWifi (){
-        //Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-
         if(Wifi.isWifiEnabled()) {
             // wifi enabled
-            Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-            WifiConnection = Wifi.getConnectionInfo();
-            ConnectedSSID = WifiConnection.getSSID(); // SSID of connected network
-
             return true;
         } else {
             Wifi.setWifiEnabled(true);
             if(Wifi.isWifiEnabled()){
-                Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-                WifiConnection = Wifi.getConnectionInfo();
-                ConnectedSSID = WifiConnection.getSSID(); // SSID of connected network
                 return true;
-
             }
             // wifi still not enabled
             return false;
@@ -175,15 +212,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * do a new scan for WAPs and collate them
+     * do a new scan for WAPs and collate them, then filter to only contain WAP with same SSID
      * @return true is it is successful
      */
-    private boolean getWAP () {
-        boolean scan = Wifi.startScan (); // scan for WAPs
+    private List<ScanResult> getWAPs () {
+        boolean scan = Wifi.startScan(); // scan for WAPs
 
         if(!scan){
             // scan failed, do something
-            return false;
+            return new ArrayList<ScanResult>();
         } else {
             // scan success
             List<ScanResult> all_WAPs = Wifi.getScanResults(); // get list of WAPs
@@ -199,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
             WAPs = filtered_WAPs; // update public field
-            return true;
+            return filtered_WAPs;
         }
     }
 }

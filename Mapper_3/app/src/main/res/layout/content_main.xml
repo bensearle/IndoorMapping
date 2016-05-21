@@ -22,7 +22,7 @@
         android:orientation="vertical"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/button1"
+        android:layout_below="@+id/ButtonRefreshNetwork"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="65dp"
         android:id="@+id/linearlayout"
@@ -219,12 +219,12 @@
         style="?android:attr/buttonStyleSmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button 1"
-        android:id="@+id/button1"
-        android:onClick="button1_OnClick"
+        android:text="Refresh Network"
+        android:id="@+id/ButtonRefreshNetwork"
         android:nestedScrollingEnabled="true"
         android:layout_alignTop="@+id/textView"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:onClick="RefreshNetwork" />
 
     <TextView
         android:layout_width="wrap_content"
@@ -232,7 +232,7 @@
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="SSID"
         android:id="@+id/OutputSSID"
-        android:layout_below="@+id/button1"
+        android:layout_below="@+id/ButtonRefreshNetwork"
         android:layout_toEndOf="@+id/textView" />
 
 </RelativeLayout>
