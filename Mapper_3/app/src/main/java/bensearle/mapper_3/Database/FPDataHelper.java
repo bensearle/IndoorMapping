@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -93,7 +94,7 @@ public class FPDataHelper extends SQLiteOpenHelper {
         return true;
     }
 
-    public void GetFingerprintByWAP(String wapBSSID){
+    public ArrayList<String> GetFingerprintByWAP(String wapBSSID){
         SQLiteDatabase db = this.getReadableDatabase();
 
         String[] columns = {
@@ -116,6 +117,46 @@ public class FPDataHelper extends SQLiteOpenHelper {
                 filter,                   // filter by row groups
                 sortOrder               // sort order
         );
+
+        ArrayList<String> fpTAGs = new ArrayList<String>();
+        for(results.moveToFirst(); !results.isAfterLast(); results.moveToNext()) {
+            // get string of data in column 0
+            fpTAGs.add(results.getString(0));
+        }
+
+        return fpTAGs;
+    }
+
+    public Cursor GetFingerprintByTag(String tag){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] columns = {
+                FPDataEntry.COLUMN_NAME_FPTAG,
+                FPDataEntry.COLUMN_NAME_X,
+                FPDataEntry.COLUMN_NAME_Y,
+                FPDataEntry.COLUMN_NAME_Z,
+                FPDataEntry.COLUMN_NAME_BSSID,
+                FPDataEntry.COLUMN_NAME_RSSI
+        };
+
+        String selection = FPDataEntry.COLUMN_NAME_FPTAG+"=?";
+        String selectionArgs[] = {tag};
+
+        String groupBy = null;
+        String filter = null; // HAVING clause
+        String sortOrder = FPDataEntry.COLUMN_NAME_FPTAG + " DESC";
+
+        Cursor results = db.query(
+                FPDataEntry.TABLE_NAME, // table to query
+                columns,                // columns to return
+                selection,              // columns for the WHERE clause
+                selectionArgs,          // values for the WHERE clause
+                groupBy,                // group the rows
+                filter,                   // filter by row groups
+                sortOrder               // sort order
+        );
+
+        return results;
     }
 
 }
