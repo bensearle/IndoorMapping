@@ -1,10 +1,18 @@
 package bensearle.mapper_3.Database;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.Iterator;
+import java.util.Map;
+
 import bensearle.mapper_3.Database.FPDataContract.FPDataEntry;
+import bensearle.mapper_3.Structures.Fingerprint;
+import bensearle.mapper_3.Structures.Point3D;
+
 /**
  * Created by bensearle on 22/05/2016.
  */
@@ -47,4 +55,67 @@ public class FPDataHelper extends SQLiteOpenHelper {
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
     }
+
+
+    /*
+     * ACCESSING THE DATABASE
+     */
+
+
+
+    public void AddFP(Fingerprint fingerprint){
+        // TODO check location is not null
+        String fptag = fingerprint.GetTag();
+        Point3D location = fingerprint.GetPosition();
+        Map<String, Integer> waps = fingerprint.GetWAPs();
+
+        // add each WAP to database, with fptag, location
+        for(Iterator i = waps.entrySet().iterator(); i.hasNext();) {
+            Map.Entry item = (Map.Entry) i.next();
+            String bssid = (String) item.getKey();
+            Integer rssi = (Integer) item.getValue();
+
+            addFPData (fptag, location, bssid, rssi); // add to DB
+        }
+    }
+
+    private boolean addFPData (String fptag, Point3D p, String bssid, Integer rssi)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(FPDataEntry.COLUMN_NAME_FPTAG, fptag);
+        contentValues.put(FPDataEntry.COLUMN_NAME_X, p.X);
+        contentValues.put(FPDataEntry.COLUMN_NAME_Y, p.Y);
+        contentValues.put(FPDataEntry.COLUMN_NAME_Z, p.Z);
+        contentValues.put(FPDataEntry.COLUMN_NAME_BSSID, bssid);
+        contentValues.put(FPDataEntry.COLUMN_NAME_RSSI, rssi);
+        long newRowID = db.insert(FPDataEntry.TABLE_NAME, null, contentValues);
+        return true;
+    }
+
+    public void GetFingerprintByWAP(String wapBSSID){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] columns = {
+                FPDataEntry.COLUMN_NAME_FPTAG
+        };
+
+        String selection = FPDataEntry.COLUMN_NAME_BSSID+"=?";
+        String selectionArgs[] = {wapBSSID};
+
+        String groupBy = null;
+        String filter = null; // HAVING clause
+        String sortOrder = FPDataEntry.COLUMN_NAME_FPTAG + " DESC";
+
+        Cursor results = db.query(
+                FPDataEntry.TABLE_NAME, // table to query
+                columns,                // columns to return
+                selection,              // columns for the WHERE clause
+                selectionArgs,          // values for the WHERE clause
+                groupBy,                // group the rows
+                filter,                   // filter by row groups
+                sortOrder               // sort order
+        );
+    }
+
 }
