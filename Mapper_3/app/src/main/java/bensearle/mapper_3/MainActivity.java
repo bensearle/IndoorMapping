@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import bensearle.mapper_3.Database.FPDataHelper;
 import bensearle.mapper_3.Structures.Fingerprint;
 import bensearle.mapper_3.Structures.Point3D;
 
@@ -82,6 +83,20 @@ public class MainActivity extends AppCompatActivity {
     public int testX;
     public int testY;
     public int testZ;
+
+    public void test(){
+
+        // initialize the database and use this to access / add, get, etc
+        FPDataHelper mDbHelper = new FPDataHelper(getApplicationContext());
+        // FPDataHelper mDbHelper = new FPDataHelper(this);
+        // FPDataHelper mDbHelper = new FPDataHelper(geContext());
+        // FPDataHelper mDbHelper = new FPDataHelper(getContext());
+
+
+
+
+
+    }
 
     public void AddPoint(View v){
         Log.d("AddPoint","In  ("+testX+","+testY+","+testZ+")");
