@@ -85,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
 
     public static int EUCLIDEAN_DISTANCE_POINTS = 5; // how many points/WAPs to compare when calculating Euclidean distance
 
-    FPDataHelper database = new FPDataHelper(getApplicationContext());
+    FPDataHelper database; // = new FPDataHelper(getApplicationContext());
 
     public int testX;
     public int testY;
@@ -251,6 +251,13 @@ public class MainActivity extends AppCompatActivity {
             Log.d("RefreshNetwork", "No Network");
 
         }
+
+        Log.d("RefreshNetwork", "Initialise database");
+        // connect to database
+        FPDataHelper database = new FPDataHelper(getApplicationContext());
+        Log.d("RefreshNetwork", "Database initialised");
+
+
     }
 
     /**
