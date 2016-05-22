@@ -14,6 +14,8 @@ public class Triangle3D {
     public double Distance2;
     public double Distance3;
 
+    public Triangle3D (){}
+
     public Triangle3D (Point3D p1, Point3D p2, Point3D p3){
         Point1 = p1;
         Point2 = p2;
@@ -94,5 +96,15 @@ public class Triangle3D {
         return new Point3D(x,y,z);
     }
 
-
+    public void AddPoint(Point3D point){
+        if (!Point1.isComplete()){
+            Point1 = point;
+        } else if (!Point2.isComplete()){
+            Point2 = point;
+        } else if (!Point3.isComplete()){
+            Point3 = point;
+        } else {
+            // all points have been set
+        }
+    }
 }

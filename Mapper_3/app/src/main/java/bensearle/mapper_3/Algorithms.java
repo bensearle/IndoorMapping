@@ -13,12 +13,12 @@ public class Algorithms {
      * the distance between an unknown point and a point of reference
      * @return the distance
      */
-    public double Euclidean_Distance(int[] values1, int[] values2){
+    public static double Euclidean_Distance(int[] values1, int[] values2){
         double d;
 
         double Sum = 0.0;
 
-        for(int i=0;i<values1.length;i++) {
+        for(int i=0; i<values1.length; i++) {
             Sum = Sum + Math.pow((values1[i]-values2[i]),2.0);
         }
 
@@ -27,6 +27,23 @@ public class Algorithms {
         return d;
     }
 
+    /**
+     * the distance between an unknown point and a point of reference
+     * @return the distance
+     */
+    public static double Euclidean_Distance(int[][] values){
+        double d;
+
+        double Sum = 0.0;
+
+        for(int i=0; i<values.length/2; i++) {
+            Sum = Sum + Math.pow((values[i][0]-values[i][1]),2.0);
+        }
+
+        d = Math.sqrt(Sum);
+
+        return d;
+    }
 
     public void CircleIntercetion(Circle3D circle1, Circle3D circle2){
 

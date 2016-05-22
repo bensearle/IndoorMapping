@@ -19,12 +19,17 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import bensearle.mapper_3.Database.FPDataHelper;
 import bensearle.mapper_3.Structures.Fingerprint;
 import bensearle.mapper_3.Structures.Point3D;
+import bensearle.mapper_3.Algorithms;
+import bensearle.mapper_3.Structures.Triangle3D;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -80,6 +85,8 @@ public class MainActivity extends AppCompatActivity {
 
     public static int EUCLIDEAN_DISTANCE_POINTS = 5; // how many points/WAPs to compare when calculating Euclidean distance
 
+    FPDataHelper database = new FPDataHelper(getApplicationContext());
+
     public int testX;
     public int testY;
     public int testZ;
@@ -87,10 +94,10 @@ public class MainActivity extends AppCompatActivity {
     public void test(){
 
         // initialize the database and use this to access / add, get, etc
-        FPDataHelper mDbHelper = new FPDataHelper(getApplicationContext());
-        // FPDataHelper mDbHelper = new FPDataHelper(this);
-        // FPDataHelper mDbHelper = new FPDataHelper(geContext());
-        // FPDataHelper mDbHelper = new FPDataHelper(getContext());
+        FPDataHelper database = new FPDataHelper(getApplicationContext());
+        // FPDataHelper database = new FPDataHelper(this);
+        // FPDataHelper database = new FPDataHelper(geContext());
+        // FPDataHelper database = new FPDataHelper(getContext());
 
 
 
@@ -115,10 +122,10 @@ public class MainActivity extends AppCompatActivity {
 
             // create fingerprint with WAPs and position
             Fingerprint fp = new Fingerprint(getWAPs());
-            fp.SetPostion(inputX,inputY,inputZ);
+            fp.SetPostion(inputX, inputY, inputZ);
 
             // add fingerprint to database
-            // TO DO
+            database.AddFP(fp);
 
             // show acknowledgement to use that point has been added successfully
             // TO DO
@@ -137,19 +144,68 @@ public class MainActivity extends AppCompatActivity {
         Log.d("GetPoint","In  ("+testX+","+testY+","+testZ+")");
 
         // create current fingerprint with WAPs
-        Fingerprint fp = new Fingerprint(getWAPs());
+        Fingerprint currentFP = new Fingerprint(getWAPs());
 
         // get similar fingerprints of reference points (RP) from database
         // RP fingerprints must have at least n WAPs the same as current fingerprint, n=EUCLIDEAN_DISTANCE_POINTS
-        // TO DECIDE: use top n WAPs of current fingerprint or any n fingerprints?
-        // TO DO
+        // use top n strongest WAPs of current fingerprint
+        String[] strongestWAPs = currentFP.GetStrongestNWaps(EUCLIDEAN_DISTANCE_POINTS);
+
+        ArrayList<String> rpFingerprintTags = new ArrayList<>(); // RP fingerprints that use n WAPs same as current
+
+        for (int i = 0; i < EUCLIDEAN_DISTANCE_POINTS; i++){ // iterate the top n strongest WAPs
+            if (i == 0){
+                rpFingerprintTags = database.GetFingerprintByWAP(strongestWAPs[i]);
+            } else {
+                ArrayList<String> rpFingerprintTags_next = database.GetFingerprintByWAP(strongestWAPs[i]); // fp tags for next WAP in list
+                ArrayList<String> both = new ArrayList<>(); // list of WAPs in both rpFingerprintTags lists
+
+                for (String tag: rpFingerprintTags){ // iterate list one
+                    if (rpFingerprintTags_next.contains(tag)){ // if tag is also in list 2
+                        both.add(tag); // add to both list
+                    }
+                }
+                rpFingerprintTags = both; // update master list
+            }
+        }
 
         // get Euclidean distance between each RP fingerprint and current fingerprint
-        // TO DO
+        // store RP fingerprints and distances to current fingerprint, TreeMap sorted by key
+        Map<Float,Fingerprint> fingerprintAndDistance = new TreeMap<Float,Fingerprint>(Collections.reverseOrder());
+
+        for (String fptag: rpFingerprintTags){ // iterate list one
+            int[][] rssiCurrentandRP = new int[EUCLIDEAN_DISTANCE_POINTS][2]; // row for each ED point, columns for 2 fingerprints
+            Fingerprint rpFingerprint = new Fingerprint(database.GetFingerprintByTag(fptag)); // get RP fingerprint from DB
+
+            int count = 0;
+            for (String wap: strongestWAPs){
+                rssiCurrentandRP[count][0] = currentFP.GetRSSI(wap);
+                rssiCurrentandRP[count][1] = rpFingerprint.GetRSSI(wap);
+                count++;
+            }
+
+            float distance = (float) Algorithms.Euclidean_Distance(rssiCurrentandRP); // get Euclidean distance
+
+            // make sure distance is not already in map, as no duplicate keys. precision is lost
+            while(fingerprintAndDistance.containsKey(distance)){
+                distance += Float.MIN_VALUE;
+            }
+
+            fingerprintAndDistance.put(distance, rpFingerprint); // store fingerprint and distance
+        }
 
         // localization algorithm: decreasing triangles
-        // use 3 closest RP
-        // TO DO
+        Triangle3D triangle = new Triangle3D();
+        int count = 0;
+        for(Iterator i = fingerprintAndDistance.entrySet().iterator(); i.hasNext();) { // iterate list of WAPs
+            if (count<3) {
+                Map.Entry item = (Map.Entry) i.next();
+                Fingerprint fp = (Fingerprint) item.getValue(); // get the fingerprint fromt the map
+                triangle.AddPoint(fp.GetPosition()); // add this position to the triangle
+            } else { break; }
+        }
+        while(triangle.DecreaseSize()); // while the triangle can decrease size, keep decreasing size
+        Point3D estimatedPoint = triangle.GetCentroid();
 
         // localization algorithm: another one
         // TO DO

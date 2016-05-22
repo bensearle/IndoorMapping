@@ -1,5 +1,6 @@
 package bensearle.mapper_3.Structures;
 
+import android.database.Cursor;
 import android.graphics.Point;
 import android.net.wifi.ScanResult;
 import android.util.Pair;
@@ -30,7 +31,7 @@ public class Fingerprint {
 
     //public List<Pair<String, Integer>> WAPS = new ArrayList<Pair<String, Integer>>(); // BSSID & RSSI of a WAP
 
-    public Map<String, Integer> WAPS = new LinkedHashMap<String, Integer>(); // BSSID & RSSI of a WAP
+    public Map<String, Integer> WAPs = new LinkedHashMap<String, Integer>(); // BSSID & RSSI of a WAP
 
 
     Pair<Integer, String> simplePair = new Pair<>(42, "Second");
@@ -46,8 +47,12 @@ public class Fingerprint {
             String BSSID = item.BSSID;
             Integer RSSI = item.level;
             //WAPS.add(new Pair<>(BSSID, RSSI));
-            WAPS.put(BSSID,RSSI);
+            WAPs.put(BSSID,RSSI);
         }
+    }
+
+    public Fingerprint(Cursor dbResults) {
+        // TODO initialize Fingerprint from DB results
     }
 
     /**
@@ -62,19 +67,19 @@ public class Fingerprint {
             ScanResult item = i.next();
             String BSSID = item.BSSID;
             Integer RSSI = item.level;
-            WAPS.put(BSSID, RSSI);
+            WAPs.put(BSSID, RSSI);
         }
     }
 
     //nothing useful
     public void IterateMap (){
-        for(Iterator i = WAPS.entrySet().iterator(); i.hasNext(); ) { // iterate list of WAPs
+        for(Iterator i = WAPs.entrySet().iterator(); i.hasNext(); ) { // iterate list of WAPs
             Map.Entry item = (Map.Entry) i.next();
             String BSSID = (String) item.getKey();
             int RSSI = (int) item.getValue();
         }
 
-        for (Map.Entry<String, Integer> entry : WAPS.entrySet())
+        for (Map.Entry<String, Integer> entry : WAPs.entrySet())
         {
             System.out.println("Key : " + entry.getKey() + " Value : "+ entry.getValue());
         }
@@ -97,23 +102,55 @@ public class Fingerprint {
 
     // get
     public Point3D GetPosition() { return location; }
-    public Integer GetRSSI(String BSSID) { return WAPS.get(BSSID); };
+    public Integer GetRSSI(String BSSID) { return WAPs.get(BSSID); };
+
+
+    /**
+     * get a tag for this fingerprint
+     * @return string in form XXXYYYZZZ
+     */
+    public String GetTag(){
+        return "" + threeDigit(location.X) + threeDigit(location.Y) + threeDigit(location.Z);
+    }
+
+    /**
+     * create string of length 3 for int. 1 --> 001
+     * @param number is the number to be converted
+     * @return 3 digit string of number
+     */
+    private String threeDigit(double number){
+        String s = ""+number;
+        int length = s.length();
+
+        if (length<1){
+            return "000";
+        } else if (length<2){
+            return "00" + number;
+        } else if (length<3){
+            return "0" + number;
+        } else if (length<4){
+            return ""+ number;
+        } else {
+            // number is longer than 3 digits
+            return "***";
+        }
+    }
 
     /**
      * get the strongest n WAPs for this fingerprint
      * @return array of BSSIDs
      */
-    public String[] GetStrongestNWaps(){
+    public String[] GetStrongestNWaps(int n){
 
-        int n = 5; // top n WAPS
+        //int n = 5; // top n WAPS
         int[] topRSSI = new int[n]; // list of top RSSI
         String[] topBSSID = new String[n]; // list of top BSSID
 
-        Map<String, Integer> sortedWaps = sortMap(WAPS); // sort the map
+        Map<String, Integer> sortedWaps = sortMap(WAPs); // sort the map
 
         // get first n
         int count = 0;
-        for(Iterator i = WAPS.entrySet().iterator(); i.hasNext();) { // iterate list of WAPs
+        for(Iterator i = WAPs.entrySet().iterator(); i.hasNext();) { // iterate list of WAPs
             if (count<n) {
                 Map.Entry item = (Map.Entry) i.next();
                 topBSSID[count] = (String) item.getKey();
@@ -125,16 +162,16 @@ public class Fingerprint {
 
     public Object[][] GetWapArray(){
         int n = 15; // top n WAPS
-        Object[][] waps = new String[n][2]; // 2 columns (bssid & rssi)
+        Object[][] waps = new Object[n][2]; // 2 columns (bssid & rssi)
 
         int[] topRSSI = new int[n]; // list of top RSSI
         String[] topBSSID = new String[n]; // list of top BSSID
 
-        Map<String, Integer> sortedWaps = sortMap(WAPS); // sort the map
+        Map<String, Integer> sortedWaps = sortMap(WAPs); // sort the map
 
         // get first n
         int count = 0;
-        for(Iterator i = WAPS.entrySet().iterator(); i.hasNext();) { // iterate list of WAPs
+        for(Iterator i = WAPs.entrySet().iterator(); i.hasNext();) { // iterate list of WAPs
             if (count<n) {
                 Map.Entry item = (Map.Entry) i.next();
                 String bssid = (String) item.getKey();
@@ -153,7 +190,7 @@ public class Fingerprint {
      */
     public boolean UsesWAPS (String[] keys){
         for (String key: keys){ // check all keys
-            if (!WAPS.containsKey(key)) return false; // false if any key is not present
+            if (!WAPs.containsKey(key)) return false; // false if any key is not present
         }
         return true; // true if fingerprint contains all keys
     }
@@ -168,11 +205,11 @@ public class Fingerprint {
      * @return true if contains all
      */
     public boolean UsesWAPS (String k1, String k2, String k3, String k4, String k5){
-        return WAPS.containsKey(k1) &&
-                WAPS.containsKey(k2) &&
-                WAPS.containsKey(k3) &&
-                WAPS.containsKey(k4) &&
-                WAPS.containsKey(k5);
+        return WAPs.containsKey(k1) &&
+                WAPs.containsKey(k2) &&
+                WAPs.containsKey(k3) &&
+                WAPs.containsKey(k4) &&
+                WAPs.containsKey(k5);
     }
 
     //http://stackoverflow.com/questions/1448369/how-to-sort-a-treemap-based-on-its-values
@@ -204,4 +241,8 @@ public class Fingerprint {
         return sortedMap;
     }
 
+
+    public Map<String, Integer> GetWAPs(){
+        return WAPs;
+    }
 }
