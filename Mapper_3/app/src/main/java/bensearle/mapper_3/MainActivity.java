@@ -1,6 +1,7 @@
 package bensearle.mapper_3;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -83,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
     public List<ScanResult> WAPs; // list of wireless access points
 
-    public static int EUCLIDEAN_DISTANCE_POINTS = 5; // how many points/WAPs to compare when calculating Euclidean distance
+
 
     FPDataHelper database; // = new FPDataHelper(getApplicationContext());
 
@@ -141,7 +142,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void GetPoint(View v){
 
-        Log.d("GetPoint","In  ("+testX+","+testY+","+testZ+")");
+        // Log.d("GetPoint","In  ("+testX+","+testY+","+testZ+")");
 
         // create current fingerprint with WAPs
         Fingerprint currentFP = new Fingerprint(getWAPs());
@@ -149,11 +150,11 @@ public class MainActivity extends AppCompatActivity {
         // get similar fingerprints of reference points (RP) from database
         // RP fingerprints must have at least n WAPs the same as current fingerprint, n=EUCLIDEAN_DISTANCE_POINTS
         // use top n strongest WAPs of current fingerprint
-        String[] strongestWAPs = currentFP.GetStrongestNWaps(EUCLIDEAN_DISTANCE_POINTS);
+        String[] strongestWAPs = currentFP.GetStrongestNWaps(UserVariables.EUCLIDEAN_DISTANCE_POINTS);
 
         ArrayList<String> rpFingerprintTags = new ArrayList<>(); // RP fingerprints that use n WAPs same as current
 
-        for (int i = 0; i < EUCLIDEAN_DISTANCE_POINTS; i++){ // iterate the top n strongest WAPs
+        for (int i = 0; i < UserVariables.EUCLIDEAN_DISTANCE_POINTS; i++){ // iterate the top n strongest WAPs
             if (i == 0){
                 rpFingerprintTags = database.GetFingerprintByWAP(strongestWAPs[i]);
             } else {
@@ -174,7 +175,7 @@ public class MainActivity extends AppCompatActivity {
         Map<Float,Fingerprint> fingerprintAndDistance = new TreeMap<Float,Fingerprint>(Collections.reverseOrder());
 
         for (String fptag: rpFingerprintTags){ // iterate list one
-            int[][] rssiCurrentandRP = new int[EUCLIDEAN_DISTANCE_POINTS][2]; // row for each ED point, columns for 2 fingerprints
+            int[][] rssiCurrentandRP = new int[UserVariables.EUCLIDEAN_DISTANCE_POINTS][2]; // row for each ED point, columns for 2 fingerprints
             Fingerprint rpFingerprint = new Fingerprint(database.GetFingerprintByTag(fptag)); // get RP fingerprint from DB
 
             int count = 0;
@@ -238,23 +239,26 @@ public class MainActivity extends AppCompatActivity {
 
         if (enableWifi()){
             WifiConnection = Wifi.getConnectionInfo();
-            ConnectedSSID = WifiConnection.getSSID(); // SSID of connected network
-            Log.d("RefreshNetwork", "Wifi: "+WifiConnection.toString());
+            Log.d("RefreshNetwork", "Wifi: " + WifiConnection.toString());
+
+            String ssid = WifiConnection.getSSID(); // SSID of connected network
+            ConnectedSSID = ssid.replaceAll("^\"|\"$", "");; // remove "quote marks"
+
 
             TextView outputSSID = (TextView)findViewById(R.id.OutputSSID);
-            outputSSID.setText(""+outputSSID);
+            outputSSID.setText(""+ConnectedSSID);
+
             Log.d("RefreshNetwork", "Network Refreshed");
-
-
         } else {
             // no wifi network
             Log.d("RefreshNetwork", "No Network");
-
         }
 
         Log.d("RefreshNetwork", "Initialise database");
         // connect to database
-        FPDataHelper database = new FPDataHelper(getApplicationContext());
+        database = new FPDataHelper(getApplicationContext());
+        Cursor databasedata = database.GetAll();
+
         Log.d("RefreshNetwork", "Database initialised");
 
 
@@ -306,7 +310,8 @@ public class MainActivity extends AppCompatActivity {
 
             for(Iterator<ScanResult> i = all_WAPs.iterator(); i.hasNext(); ) { // iterate list of WAPs
                 ScanResult item = i.next();
-                if (item.SSID == ConnectedSSID){ // if WAP has same SSID as connected network
+                //if (item.SSID.equals(ConnectedSSID)){ // if WAP has same SSID as connected network
+                if (UserVariables.UNIVERSITY_NETWORKS.contains(item.SSID)){ // if WAP is one one of the allowed network
                     filtered_WAPs.add(item); // add to list
                 } else {
                     // do nothing

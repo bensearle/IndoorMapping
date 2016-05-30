@@ -26,10 +26,10 @@ import java.util.TreeSet;
 public class Fingerprint {
 
     public String MapReference; // description of location
-    private Point3D location; // location in 3D space
+    private Point3D location = new Point3D(); // location in 3D space
 
 
-    //public List<Pair<String, Integer>> WAPS = new ArrayList<Pair<String, Integer>>(); // BSSID & RSSI of a WAP
+    //public List<Pair<String, Integer>> WAPS = new ArrayList<Pair<String, Integer>>(); // BSSID & RSSI of WAPs
 
     public Map<String, Integer> WAPs = new LinkedHashMap<String, Integer>(); // BSSID & RSSI of a WAP
 
@@ -102,7 +102,10 @@ public class Fingerprint {
 
     // get
     public Point3D GetPosition() { return location; }
-    public Integer GetRSSI(String BSSID) { return WAPs.get(BSSID); };
+    public Map<String, Integer> GetWAPs(){
+        return WAPs;
+    }
+    public Integer GetRSSI(String BSSID) { return WAPs.get(BSSID); } // return wap RSSI, given BSSID
 
 
     /**
@@ -154,6 +157,7 @@ public class Fingerprint {
             if (count<n) {
                 Map.Entry item = (Map.Entry) i.next();
                 topBSSID[count] = (String) item.getKey();
+                count++;
             } else { break; }
         }
         return topBSSID;
@@ -188,7 +192,7 @@ public class Fingerprint {
      * @param keys BSSID of WAPS to check
      * @return true if contains all
      */
-    public boolean UsesWAPS (String[] keys){
+    public boolean UsesWAPs (String[] keys){
         for (String key: keys){ // check all keys
             if (!WAPs.containsKey(key)) return false; // false if any key is not present
         }
@@ -204,7 +208,7 @@ public class Fingerprint {
      * @param k5
      * @return true if contains all
      */
-    public boolean UsesWAPS (String k1, String k2, String k3, String k4, String k5){
+    public boolean UsesWAPs (String k1, String k2, String k3, String k4, String k5){
         return WAPs.containsKey(k1) &&
                 WAPs.containsKey(k2) &&
                 WAPs.containsKey(k3) &&
@@ -239,10 +243,5 @@ public class Fingerprint {
         }
 
         return sortedMap;
-    }
-
-
-    public Map<String, Integer> GetWAPs(){
-        return WAPs;
     }
 }

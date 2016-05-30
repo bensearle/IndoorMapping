@@ -114,7 +114,7 @@ public class FPDataHelper extends SQLiteOpenHelper {
                 selection,              // columns for the WHERE clause
                 selectionArgs,          // values for the WHERE clause
                 groupBy,                // group the rows
-                filter,                   // filter by row groups
+                filter,                 // filter by row groups
                 sortOrder               // sort order
         );
 
@@ -152,11 +152,43 @@ public class FPDataHelper extends SQLiteOpenHelper {
                 selection,              // columns for the WHERE clause
                 selectionArgs,          // values for the WHERE clause
                 groupBy,                // group the rows
-                filter,                   // filter by row groups
+                filter,                 // filter by row groups
                 sortOrder               // sort order
         );
 
         return results;
     }
 
+
+    public Cursor GetAll(){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] columns = {
+                FPDataEntry.COLUMN_NAME_FPTAG,
+                FPDataEntry.COLUMN_NAME_X,
+                FPDataEntry.COLUMN_NAME_Y,
+                FPDataEntry.COLUMN_NAME_Z,
+                FPDataEntry.COLUMN_NAME_BSSID,
+                FPDataEntry.COLUMN_NAME_RSSI
+        };
+
+        String selection = "";
+        String selectionArgs[] = {};
+
+        String groupBy = null;
+        String filter = null; // HAVING clause
+        String sortOrder = FPDataEntry.COLUMN_NAME_FPTAG + " DESC";
+
+        Cursor results = db.query(
+                FPDataEntry.TABLE_NAME, // table to query
+                columns,                // columns to return
+                selection,              // columns for the WHERE clause
+                selectionArgs,          // values for the WHERE clause
+                groupBy,                // group the rows
+                filter,                 // filter by row groups
+                sortOrder               // sort order
+        );
+
+        return results;
+    }
 }

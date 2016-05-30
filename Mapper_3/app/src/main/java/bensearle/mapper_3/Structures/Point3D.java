@@ -8,6 +8,10 @@ public class Point3D {
     public Double Y;
     public Double Z;
 
+    public Point3D (){
+        // initialize empty Point3D
+    }
+
     public Point3D (double x, double y, double z){
         X=x;
         Y=y;

@@ -14,11 +14,13 @@ public class FPDataContract {
     /* Inner class that defines the table contents */
     public static abstract class FPDataEntry implements BaseColumns {
         public static final String TABLE_NAME = "fpdata";
-        public static final String COLUMN_NAME_FPTAG = "fptag";
-        public static final String COLUMN_NAME_X = "x";
-        public static final String COLUMN_NAME_Y = "y";
-        public static final String COLUMN_NAME_Z = "z";
-        public static final String COLUMN_NAME_BSSID = "bssid";
-        public static final String COLUMN_NAME_RSSI = "rssi";
+        public static final String COLUMN_NAME_FPTAG = "fptag"; // 001002003
+        public static final String COLUMN_NAME_FPREF = "fpref"; // AC1-LT01
+        public static final String COLUMN_NAME_X = "x"; // 1
+        public static final String COLUMN_NAME_Y = "y"; // 2
+        public static final String COLUMN_NAME_Z = "z"; // 3
+        public static final String COLUMN_NAME_SSSID = "ssid"; // CityU WLAN (WPA)
+        public static final String COLUMN_NAME_BSSID = "bssid"; // 00:1a:1e:97:02:b0
+        public static final String COLUMN_NAME_RSSI = "rssi"; // -61
     }
 }

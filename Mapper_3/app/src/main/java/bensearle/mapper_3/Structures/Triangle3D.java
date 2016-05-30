@@ -1,5 +1,8 @@
 package bensearle.mapper_3.Structures;
 
+import bensearle.mapper_3.MainActivity;
+import bensearle.mapper_3.UserVariables;
+
 /**
  * Created by bensearle on 20/05/2016.
  */
@@ -39,14 +42,15 @@ public class Triangle3D {
         boolean canBeSmaller = true;
         while (canBeSmaller){
             canBeSmaller = DecreaseSize();
+            this.GetCentroid(); // calculate new centre point
         }
         return this.GetCentroid();
     }
 
     public boolean DecreaseSize() {
-        Point3D p1 = moveAlongLine(Point1, centroid, Distance1);
-        Point3D p2 = moveAlongLine(Point2, centroid, Distance2);
-        Point3D p3 = moveAlongLine(Point3, centroid, Distance3);
+        Point3D p1 = moveAlongLine(Point1, centroid, UserVariables.DECREASING_TRIANGLES_FACTOR*Distance1);
+        Point3D p2 = moveAlongLine(Point2, centroid, UserVariables.DECREASING_TRIANGLES_FACTOR*Distance2);
+        Point3D p3 = moveAlongLine(Point3, centroid, UserVariables.DECREASING_TRIANGLES_FACTOR*Distance3);
 
         if (Point1==p1 || Point2==p2 || Point3==p3) {
             // at least one line cannot move closer to the centre
