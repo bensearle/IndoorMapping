@@ -7,15 +7,17 @@ import bensearle.mapper_3.UserVariables;
  * Created by bensearle on 20/05/2016.
  */
 public class Triangle3D {
+    // coordinates of vertices (RPs)
     public Point3D Point1;
     public Point3D Point2;
     public Point3D Point3;
 
-    private Point3D centroid;
-
+    // Euclidean distance between RPs and current fingerprint
     public double Distance1;
     public double Distance2;
     public double Distance3;
+
+    private Point3D centroid; // centre of the triangle
 
     public Triangle3D (){}
 
@@ -32,6 +34,7 @@ public class Triangle3D {
         Distance1 = d1;
         Distance2 = d2;
         Distance3 = d3;
+        centroid = GetCentroid();
     }
 
     /**

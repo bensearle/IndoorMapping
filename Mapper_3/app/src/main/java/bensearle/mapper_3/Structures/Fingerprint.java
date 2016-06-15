@@ -113,15 +113,20 @@ public class Fingerprint {
      * @return string in form XXXYYYZZZ
      */
     public String GetTag(){
+        String x = threeDigit(location.X);
+        String y = threeDigit(location.Y);
+        String z = threeDigit(location.Z);
+        String xyz = x+y+z;
         return "" + threeDigit(location.X) + threeDigit(location.Y) + threeDigit(location.Z);
     }
 
     /**
      * create string of length 3 for int. 1 --> 001
-     * @param number is the number to be converted
+     * @param n is the number to be converted
      * @return 3 digit string of number
      */
-    private String threeDigit(double number){
+    private String threeDigit(double n){
+        int number = (int) n;
         String s = ""+number;
         int length = s.length();
 
