@@ -20,6 +20,8 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
+import bensearle.mapper_3.Database.FPDataContract;
+
 /**
  * Created by bensearle on 19/05/2016.
  */
@@ -52,7 +54,28 @@ public class Fingerprint {
     }
 
     public Fingerprint(Cursor dbResults) {
-        // TODO initialize Fingerprint from DB results
+        boolean first = true;
+
+        for(dbResults.moveToFirst(); !dbResults.isAfterLast(); dbResults.moveToNext()) {
+            //String fptag = dbResults.getString(0);
+            String bssid = dbResults.getString(4);
+            int rssi = dbResults.getInt(5);
+
+            if (first){
+                // set the coordinates of the fingerprint
+                double x = dbResults.getDouble(1);
+                double y = dbResults.getDouble(2);
+                double z = dbResults.getDouble(3);
+                location = new Point3D(x,y,z);
+            } else {
+                // xyz should be the same for each entry
+            }
+
+            // add the wap to the list
+            WAPs.put(bssid,rssi);
+        }
+
+
     }
 
     /**
