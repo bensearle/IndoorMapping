@@ -34,21 +34,19 @@ public class CircleCluster {
             circle = new Circle3D(); // initialize the circle ** implement
         }
     }
-
-
-    public void Localise(){
-
+    
+    public Point3D Localise(){
         double percentOverlapping = getPercentOverlap();
         if (percentOverlapping > UserVariables.INCREASING_CIRCLES_PERCENT_OVERLAPPING){
             // get position
             Point3D estimatedLocation = getAverageIntersection();
+            return estimatedLocation;
         } else {
             //
             IntersectionPoints.clear(); // remove intersection points
             increaseSize();
-            Localise();
+            return Localise();
         }
-
     }
 
     private double getPercentOverlap () {
@@ -59,7 +57,6 @@ public class CircleCluster {
             for (int b = 0 ; a < numberOfCircles; b++){ // circle b
                 if (a<b){ // compare 2 circles if a<b to avoid duplicate comparisons
                     numberOverlapping += do2CirclesOverlap (circles[a],circles[b]);
-
                 }
             }
         }
@@ -68,37 +65,45 @@ public class CircleCluster {
         return percent;
     }
 
-    private int do2CirclesOverlap (Circle3D a, Circle3D b) {
+    /**
+     * find out whether the circles overlap, if yes, then add the intersection mid point to IntersectionPoints
+     * @param circle1
+     * @param circle2
+     * @return  1:circels overlap, 0:do not overlap
+     */
+    private int do2CirclesOverlap (Circle3D circle1, Circle3D circle2) {
         int overlap = 1;
 
-        Point3D d = new Point3D(
-                a.Centre.X + b.Centre.X / 2,
-                a.Centre.Y + b.Centre.Y / 2,
-                a.Centre.Z + b.Centre.Z / 2
-        );
-        // difference between circle centre points
+        // circle 1
+        double x1 = circle1.Centre.X;
+        double y1 = circle1.Centre.Y;
+        double r1 = circle1.Radius;
 
+        // circle 2
+        double x2 = circle2.Centre.X;
+        double y2 = circle2.Centre.Y;
+        double r2 = circle1.Radius;
 
+        // distance between circle centres
+        double d = Math.sqrt ((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
 
+        if (d<(r1+r2)){
+            // the circles overlap
+            // distance between circle 1 centre and circle intersection line
+            double d1 = (r1*r1 - r2*r2 + d*d) / d*d;
 
+            // circle intersection mid point
+            double x3 = x1 + (d1 * (x2 - x1)) / d;
+            double y3 = y1 + (d1 * (y2 - y1)) / d;
+            double z3 = (circle1.Centre.Z + circle2.Centre.Z) / 2; // z-coords should be the same
+            // add point to the list of intersection points
+            IntersectionPoints.add(new Point3D(x3,y3,z3));
 
-
-
-
-
-
-
-
-
-
-        // 1:overlap, 0:do not overlap
-        if (overlap==1){
-            IntersectionPoints.add(new Point3D()); // add the average intersection points ** TO DO
             return 1;
         } else {
+            // the circles do not overlap
             return 0;
         }
-
     }
 
 
