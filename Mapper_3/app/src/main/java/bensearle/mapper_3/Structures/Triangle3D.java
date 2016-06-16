@@ -51,6 +51,7 @@ public class Triangle3D {
     }
 
     public boolean DecreaseSize() {
+        GetCentroid();
         Point3D p1 = moveAlongLine(Point1, centroid, UserVariables.DECREASING_TRIANGLES_FACTOR*Distance1);
         Point3D p2 = moveAlongLine(Point2, centroid, UserVariables.DECREASING_TRIANGLES_FACTOR*Distance2);
         Point3D p3 = moveAlongLine(Point3, centroid, UserVariables.DECREASING_TRIANGLES_FACTOR*Distance3);
@@ -96,14 +97,27 @@ public class Triangle3D {
         double y = (Point1.Y + Point2.Y + Point3.Y)/3;
         double z = (Point1.Z + Point2.Z + Point3.Z)/3;
 
-        centroid.X = x;
-        centroid.Y = y;
-        centroid.Z = z;
+        centroid = new Point3D(x,y,z);
 
         return new Point3D(x,y,z);
     }
 
-    public void AddPoint(Point3D point){
+    public void AddRP(Point3D point, Float distance){
+
+        if (Point1==null){
+            Point1 = point;
+            Distance1 = distance;
+        } else if (Point2==null){
+            Point2 = point;
+            Distance2 = distance;
+        } else if (Point3==null){
+            Point3 = point;
+            Distance3 = distance;
+        } else {
+            // all points have been set
+        }
+
+        /*
         if (!Point1.isComplete()){
             Point1 = point;
         } else if (!Point2.isComplete()){
@@ -113,5 +127,6 @@ public class Triangle3D {
         } else {
             // all points have been set
         }
+         */
     }
 }

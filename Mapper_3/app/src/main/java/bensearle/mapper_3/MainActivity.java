@@ -131,6 +131,11 @@ public class MainActivity extends AppCompatActivity {
             // show acknowledgement to use that point has been added successfully
             // TO DO
 
+            // clear text boxes
+            ((EditText) findViewById(R.id.InputX)).setText("");
+            ((EditText) findViewById(R.id.InputY)).setText("");
+            ((EditText) findViewById(R.id.InputZ)).setText("");
+
             testX = inputX;
             testY = inputY;
             testZ = inputZ;
@@ -202,16 +207,28 @@ public class MainActivity extends AppCompatActivity {
             if (count<3) {
                 Map.Entry item = (Map.Entry) i.next();
                 Fingerprint fp = (Fingerprint) item.getValue(); // get the fingerprint fromt the map
-                triangle.AddPoint(fp.GetPosition()); // add this position to the triangle
+                Float distance = (Float) item.getKey();
+                triangle.AddRP(fp.GetPosition(), distance); // add this position and distance to the triangle
             } else { break; }
         }
         while(triangle.DecreaseSize()); // while the triangle can decrease size, keep decreasing size
-        Point3D estimatedPoint = triangle.GetCentroid();
+        Point3D estimatedPoint_DT = triangle.GetCentroid();
+
+        // output estimated position
+
+        double estX_DT = Math.round (estimatedPoint_DT.X * 100.0) / 100.0;
+        double estY_DT = Math.round (estimatedPoint_DT.Y * 100.0) / 100.0;
+        double estZ_DT = Math.round (estimatedPoint_DT.Z * 100.0) / 100.0;
+
+        ((TextView) findViewById(R.id.OutputX_DT)).setText(""+estX_DT);
+        ((TextView) findViewById(R.id.OutputY_DT)).setText(""+estY_DT);
+        ((TextView) findViewById(R.id.OutputZ_DT)).setText(""+estZ_DT);
+
 
         // localization algorithm: another one
         // TO DO
 
-        // output estimated position
+        /*
         TextView outputX = (TextView)findViewById(R.id.OutputX);
         TextView outputY = (TextView)findViewById(R.id.OutputY);
         TextView outputZ = (TextView)findViewById(R.id.OutputZ);
@@ -219,6 +236,10 @@ public class MainActivity extends AppCompatActivity {
         outputX.setText(""+testX);
         outputY.setText(""+testY);
         outputZ.setText(""+testZ);
+*/
+
+
+
 
         Log.d("GetPoint", "Out  (" + testX + "," + testY + "," + testZ + ")");
 
@@ -260,8 +281,6 @@ public class MainActivity extends AppCompatActivity {
         Cursor databasedata = database.GetAll();
 
         Log.d("RefreshNetwork", "Database initialised");
-
-
     }
 
     /**
