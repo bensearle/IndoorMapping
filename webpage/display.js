@@ -22,17 +22,25 @@ canvas.height = 2339;
 
 var floorplan = new Image;
 
-var xOffset = 398;
-var yOffset = 997;
+var xOffset = 452;
+var yOffset = 979;
 var originalgridspacing = 17.9; // fixed: the grid spacing of the image
-var gridspacing = 5 * originalgridspacing;
+var gridspacing = 8 * originalgridspacing;
 var xMax = 30;
-var yMax = 15;
+var yMax = 6;
 
 var lWidth = 2;
 var lColour = '#0000ff';
 
-var RPs = [{x:1, y:3}, {x:1, y:4}, {x:1, y:5}];
+var RPs = [{x:0, y:0}, {x:1, y:0}, {x:2, y:0}, {x:3, y:0}, {x:4, y:0}, {x:5, y:0}, {x:6, y:0},
+           {x:0, y:1}, {x:1, y:1}, {x:2, y:1}, {x:3, y:1}, {x:4, y:1}, {x:5, y:1}, {x:6, y:1},
+           {x:0, y:2}, {x:1, y:2}, {x:2, y:2}, {x:3, y:2}, {x:4, y:2}, {x:5, y:2}, {x:6, y:2},
+           {x:0, y:3}, {x:1, y:3}, {x:2, y:3}, {x:3, y:3}, {x:4, y:3}, {x:5, y:3}, {x:6, y:3},
+           {x:0, y:4}, {x:1, y:4}, {x:2, y:4}, {x:3, y:4}, {x:4, y:4}, {x:5, y:4}, {x:6, y:4},
+           {x:0, y:5}, {x:1, y:5}, {x:2, y:5}, {x:3, y:5}, {x:4, y:5}, {x:5, y:5}, {x:6, y:5},
+           {x:0, y:6}, {x:1, y:6}, {x:2, y:6}, {x:3, y:6}, {x:4, y:6}, {x:5, y:6}, {x:6, y:6}
+
+          ];
 var totalRPs = RPs.length;
 rpColour = '#000000';
 
@@ -171,7 +179,7 @@ window.onload = function() {
     canvas.addEventListener('mousewheel', handleScroll, false);
 };
 
-floorplan.src = 'Floor_4.png';
+floorplan.src = 'Floor4.png';
 
 // Adds ctx.getTransform() - returns an SVGMatrix
 // Adds ctx.transformedPoint(x,y) - returns an SVGPoint
