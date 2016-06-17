@@ -31,4 +31,15 @@ public class Point3D {
         }
         return false;
     }
+
+    /**
+     * create a string of the point, with XYZ rounded to 2 d.p.
+     * @return ( X.xx , Y.yy , Z.zz )
+     */
+    public String toString (){
+        return "( " + Math.round (X * 100.0) / 100.0 +
+              " , " + Math.round (Y * 100.0) / 100.0 +
+              " , " + Math.round (Z * 100.0) / 100.0 + " )";
+
+    }
 }

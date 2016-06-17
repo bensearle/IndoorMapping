@@ -20,6 +20,7 @@ import android.widget.RemoteViews;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -200,7 +201,48 @@ public class MainActivity extends AppCompatActivity {
             fingerprintAndDistance.put(distance, rpFingerprint); // store fingerprint and distance
         }
 
-        // localization algorithm: decreasing triangles
+
+
+
+
+        List sortedDistance = new ArrayList(fingerprintAndDistance.keySet());
+        Collections.sort(sortedDistance);
+
+        /*
+         * localization algorithm: decreasing triangles
+         */
+
+        // using closest 3 RPs
+        List<Float> closest3 = sortedDistance.subList(0, 3); // get the first 3 RP distances
+        Triangle3D triangleClosest3 = new Triangle3D();
+        for (Float distance: closest3){
+            Fingerprint fp = fingerprintAndDistance.get(distance);
+            triangleClosest3.AddRP(fp.GetPosition(), distance); // add this position and distance to the triangle
+        }
+        while(triangleClosest3.DecreaseSize()); // while the triangle can decrease size, keep decreasing size
+        Point3D estimatedPoint_DTClosest = triangleClosest3.GetCentroid();
+        Log.d("TD","TD_Closest3: " + estimatedPoint_DTClosest.toString());
+
+        // using furthest 3 RPs
+        List<Float> furthest3 = sortedDistance.subList(Math.max(sortedDistance.size() - 3, 0), sortedDistance.size()); // get the last 3 RP distances
+        Triangle3D triangleFurthest3 = new Triangle3D();
+        for (Float distance: furthest3){
+            Fingerprint fp = fingerprintAndDistance.get(distance);
+            triangleFurthest3.AddRP(fp.GetPosition(), distance); // add this position and distance to the triangle
+        }
+        while(triangleFurthest3.DecreaseSize()); // while the triangle can decrease size, keep decreasing size
+        Point3D estimatedPoint_DTFurthest = triangleFurthest3.GetCentroid();
+        Log.d("TD","TD_Furthest3: " + estimatedPoint_DTFurthest.toString());
+
+        // output estimate to gui
+        double estX_DT = Math.round (estimatedPoint_DTClosest.X * 100.0) / 100.0;
+        double estY_DT = Math.round (estimatedPoint_DTClosest.Y * 100.0) / 100.0;
+        double estZ_DT = Math.round (estimatedPoint_DTClosest.Z * 100.0) / 100.0;
+        ((TextView) findViewById(R.id.OutputX_DT)).setText(""+estX_DT);
+        ((TextView) findViewById(R.id.OutputY_DT)).setText(""+estY_DT);
+        ((TextView) findViewById(R.id.OutputZ_DT)).setText("" + estZ_DT);
+        
+        /*
         Triangle3D triangle = new Triangle3D();
         int count = 0;
         for(Iterator i = fingerprintAndDistance.entrySet().iterator(); i.hasNext();) { // iterate list of WAPs
@@ -214,8 +256,8 @@ public class MainActivity extends AppCompatActivity {
         while(triangle.DecreaseSize()); // while the triangle can decrease size, keep decreasing size
         Point3D estimatedPoint_DT = triangle.GetCentroid();
 
-        // output estimated position
 
+        // output estimated position
         double estX_DT = Math.round (estimatedPoint_DT.X * 100.0) / 100.0;
         double estY_DT = Math.round (estimatedPoint_DT.Y * 100.0) / 100.0;
         double estZ_DT = Math.round (estimatedPoint_DT.Z * 100.0) / 100.0;
@@ -223,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.OutputX_DT)).setText(""+estX_DT);
         ((TextView) findViewById(R.id.OutputY_DT)).setText(""+estY_DT);
         ((TextView) findViewById(R.id.OutputZ_DT)).setText(""+estZ_DT);
-
+        */
 
         // localization algorithm: another one
         // TO DO
