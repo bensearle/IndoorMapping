@@ -1,0 +1,37 @@
+html {
+     height: 100%;
+}
+body {
+     height: 100%;
+     margin: 0;
+     padding: 0;
+}
+
+h1{
+	margin: 0;
+    padding: 0;
+	text-align: center;
+}
+#sideView {
+	font-family: "Trebuchet MS", Helvetica, sans-serif;
+	float:left;
+	width:25%;
+	height:100%;
+    position: fixed;
+}
+
+
+
+
+#mainView {
+	float:right;
+	width:75%;
+    height: 100%;
+}
+
+#canvas {
+    top: 0px;
+    left: 0px;
+    width:3309px;
+    height:2339px;
+}
