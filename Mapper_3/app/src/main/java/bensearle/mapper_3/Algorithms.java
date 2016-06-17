@@ -57,5 +57,9 @@ public class Algorithms {
 
     }
 
+    public double log2(double x)
+    {
+        return (int) (Math.log(x) / Math.log(2));
+    }
 
 }

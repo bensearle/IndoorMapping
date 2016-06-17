@@ -24,7 +24,8 @@ public class Circle3D {
 
     public Circle3D (Point3D centre, double r){
         Centre = centre;
-        Radius=r;
+        Radius = r;
+        Distance = r;
     }
 
     /**

@@ -28,6 +28,8 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import bensearle.mapper_3.Database.FPDataHelper;
+import bensearle.mapper_3.Structures.Circle3D;
+import bensearle.mapper_3.Structures.CircleCluster;
 import bensearle.mapper_3.Structures.Fingerprint;
 import bensearle.mapper_3.Structures.Point3D;
 import bensearle.mapper_3.Algorithms;
@@ -205,15 +207,15 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-        List sortedDistance = new ArrayList(fingerprintAndDistance.keySet());
-        Collections.sort(sortedDistance);
+        List<Float> sortedDistances = new ArrayList(fingerprintAndDistance.keySet());
+        Collections.sort(sortedDistances);
 
         /*
          * localization algorithm: decreasing triangles
          */
 
         // using closest 3 RPs
-        List<Float> closest3 = sortedDistance.subList(0, 3); // get the first 3 RP distances
+        List<Float> closest3 = sortedDistances.subList(0, 3); // get the first 3 RP distances
         Triangle3D triangleClosest3 = new Triangle3D();
         for (Float distance: closest3){
             Fingerprint fp = fingerprintAndDistance.get(distance);
@@ -224,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
         Log.d("TD","TD_Closest3: " + estimatedPoint_DTClosest.toString());
 
         // using furthest 3 RPs
-        List<Float> furthest3 = sortedDistance.subList(Math.max(sortedDistance.size() - 3, 0), sortedDistance.size()); // get the last 3 RP distances
+        List<Float> furthest3 = sortedDistances.subList(Math.max(sortedDistances.size() - 3, 0), sortedDistances.size()); // get the last 3 RP distances
         Triangle3D triangleFurthest3 = new Triangle3D();
         for (Float distance: furthest3){
             Fingerprint fp = fingerprintAndDistance.get(distance);
@@ -238,10 +240,10 @@ public class MainActivity extends AppCompatActivity {
         double estX_DT = Math.round (estimatedPoint_DTClosest.X * 100.0) / 100.0;
         double estY_DT = Math.round (estimatedPoint_DTClosest.Y * 100.0) / 100.0;
         double estZ_DT = Math.round (estimatedPoint_DTClosest.Z * 100.0) / 100.0;
-        ((TextView) findViewById(R.id.OutputX_DT)).setText(""+estX_DT);
-        ((TextView) findViewById(R.id.OutputY_DT)).setText(""+estY_DT);
+        ((TextView) findViewById(R.id.OutputX_DT)).setText("" + estX_DT);
+        ((TextView) findViewById(R.id.OutputY_DT)).setText("" + estY_DT);
         ((TextView) findViewById(R.id.OutputZ_DT)).setText("" + estZ_DT);
-        
+
         /*
         Triangle3D triangle = new Triangle3D();
         int count = 0;
@@ -267,8 +269,19 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.OutputZ_DT)).setText(""+estZ_DT);
         */
 
-        // localization algorithm: another one
-        // TO DO
+        /*
+         * localization algorithm: overlapping circles
+         */
+        CircleCluster circles = new CircleCluster(sortedDistances, fingerprintAndDistance);
+        Point3D estimatedPoint_OC = circles.Localise();
+
+        // output estimate to gui
+        double estX_OC = Math.round (estimatedPoint_OC.X * 100.0) / 100.0;
+        double estY_OC = Math.round (estimatedPoint_OC.Y * 100.0) / 100.0;
+        double estZ_OC = Math.round (estimatedPoint_OC.Z * 100.0) / 100.0;
+        ((TextView) findViewById(R.id.OutputX_OC)).setText("" + estX_OC);
+        ((TextView) findViewById(R.id.OutputY_OC)).setText("" + estY_OC);
+        ((TextView) findViewById(R.id.OutputZ_OC)).setText("" + estZ_OC);
 
         /*
         TextView outputX = (TextView)findViewById(R.id.OutputX);
