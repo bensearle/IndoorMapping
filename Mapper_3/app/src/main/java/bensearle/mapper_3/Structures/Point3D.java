@@ -42,4 +42,9 @@ public class Point3D {
               " , " + Math.round (Z * 100.0) / 100.0 + " )";
 
     }
+
+    public boolean equals (Point3D p){
+        return (X == p.X) && (Y == p.Y) && (Z == p.Z);
+    }
+
 }

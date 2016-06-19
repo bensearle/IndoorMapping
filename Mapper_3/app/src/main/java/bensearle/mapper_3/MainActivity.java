@@ -34,6 +34,7 @@ import bensearle.mapper_3.Structures.Fingerprint;
 import bensearle.mapper_3.Structures.Point3D;
 import bensearle.mapper_3.Algorithms;
 import bensearle.mapper_3.Structures.Triangle3D;
+import bensearle.mapper_3.Structures.Square3D;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -292,7 +293,10 @@ public class MainActivity extends AppCompatActivity {
         outputY.setText(""+testY);
         outputZ.setText(""+testZ);
 */
-
+        /*
+         * localization algorithm: weighted coordinates
+         */
+        Square3D square = new Square3D(sortedDistances, fingerprintAndDistance);
 
 
 
