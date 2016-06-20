@@ -191,4 +191,9 @@ public class FPDataHelper extends SQLiteOpenHelper {
 
         return results;
     }
+
+    public void DeleteAll(){
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.execSQL("delete from "+ FPDataEntry.TABLE_NAME);
+    }
 }

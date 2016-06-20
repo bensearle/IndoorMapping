@@ -3,6 +3,7 @@ package bensearle.mapper_3.Structures;
 import android.database.Cursor;
 import android.graphics.Point;
 import android.net.wifi.ScanResult;
+import android.util.Log;
 import android.util.Pair;
 
 import java.util.ArrayList;
@@ -173,6 +174,18 @@ public class Fingerprint {
      */
     public String[] GetStrongestNWaps(int n){
 
+
+        /*
+        List<Integer> sortedDistances = new ArrayList(WAPs.values());
+        Collections.sort(sortedDistances);
+
+        List<Integer> strongestN = sortedDistances.subList(Math.max(0, sortedDistances.size() - 5), sortedDistances.size()); // get the first 3 RP distances
+        for (Integer distance: strongestN){
+            //String wap = WAPs.get(distance);
+            Log.d("", "" + distance);
+        }
+*/
+
         //int n = 5; // top n WAPS
         int[] topRSSI = new int[n]; // list of top RSSI
         String[] topBSSID = new String[n]; // list of top BSSID
@@ -181,7 +194,7 @@ public class Fingerprint {
 
         // get first n
         int count = 0;
-        for(Iterator i = WAPs.entrySet().iterator(); i.hasNext();) { // iterate list of WAPs
+        for(Iterator i = sortedWaps.entrySet().iterator(); i.hasNext();) { // iterate list of WAPs
             if (count<n) {
                 Map.Entry item = (Map.Entry) i.next();
                 topBSSID[count] = (String) item.getKey();

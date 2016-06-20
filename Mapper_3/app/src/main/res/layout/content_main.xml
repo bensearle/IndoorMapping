@@ -233,7 +233,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:text="X_WC"
-                    android:id="@+id/textView17"
+                    android:id="@+id/OutputX_WC"
                     android:layout_column="8" />
 
             </TableRow>
@@ -271,7 +271,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:text="Y_WC"
-                    android:id="@+id/textView18"
+                    android:id="@+id/OutputY_WC"
                     android:layout_column="8" />
 
             </TableRow>
@@ -309,7 +309,7 @@
                     android:layout_height="wrap_content"
                     android:textAppearance="?android:attr/textAppearanceLarge"
                     android:text="Z_WC"
-                    android:id="@+id/textView19"
+                    android:id="@+id/OutputZ_WC"
                     android:layout_column="8" />
 
             </TableRow>

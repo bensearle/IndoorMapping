@@ -15,7 +15,7 @@ public class UserVariables {
 
     //TODO
     // change to 1, set as 9 for testing****
-    public static int GRID_THICKNESS = 9; // what is the x/y distance between RPs
+    public static int GRID_THICKNESS = 1; // what is the x/y distance between RPs
 
     public static List<String> UNIVERSITY_NETWORKS = new ArrayList<String>(){{
         add("CityU WLAN (WPA)");

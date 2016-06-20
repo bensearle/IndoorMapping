@@ -62,4 +62,11 @@ public class Algorithms {
         return (int) (Math.log(x) / Math.log(2));
     }
 
+    public static double min(Double x1, Double x2, Double x3, Double x4) {
+        return Math.min( Math.min(x1, x2), Math.min(x3, x4));
+    }
+
+    public static double max(Double x1, Double x2, Double x3, Double x4) {
+        return Math.max(Math.max(x1, x2), Math.max(x3, x4));
+    }
 }

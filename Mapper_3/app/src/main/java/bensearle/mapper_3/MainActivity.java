@@ -216,7 +216,7 @@ public class MainActivity extends AppCompatActivity {
          */
 
         // using closest 3 RPs
-        List<Float> closest3 = sortedDistances.subList(0, 3); // get the first 3 RP distances
+        List<Float> closest3 = sortedDistances.subList(0, Math.min(3, sortedDistances.size())); // get the first 3 RP distances
         Triangle3D triangleClosest3 = new Triangle3D();
         for (Float distance: closest3){
             Fingerprint fp = fingerprintAndDistance.get(distance);
@@ -297,7 +297,15 @@ public class MainActivity extends AppCompatActivity {
          * localization algorithm: weighted coordinates
          */
         Square3D square = new Square3D(sortedDistances, fingerprintAndDistance);
+        Point3D estimatedPoint_WC = square.Localise();
 
+        // output estimate to gui
+        double estX_WC = Math.round (estimatedPoint_WC.X * 100.0) / 100.0;
+        double estY_WC = Math.round (estimatedPoint_WC.Y * 100.0) / 100.0;
+        double estZ_WC = Math.round (estimatedPoint_WC.Z * 100.0) / 100.0;
+        ((TextView) findViewById(R.id.OutputX_WC)).setText("" + estX_WC);
+        ((TextView) findViewById(R.id.OutputY_WC)).setText("" + estY_WC);
+        ((TextView) findViewById(R.id.OutputZ_WC)).setText("" + estZ_WC);
 
 
         Log.d("GetPoint", "Out  (" + testX + "," + testY + "," + testZ + ")");
@@ -339,6 +347,7 @@ public class MainActivity extends AppCompatActivity {
         database = new FPDataHelper(getApplicationContext());
         Cursor databasedata = database.GetAll();
 
+        //database.DeleteAll();
         Log.d("RefreshNetwork", "Database initialised");
     }
 
