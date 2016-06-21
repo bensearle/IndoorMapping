@@ -2,6 +2,7 @@ package bensearle.mapper_3;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabaseLockedException;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -92,17 +93,14 @@ public class MainActivity extends AppCompatActivity {
 
     DataHelper database; // = new FPDataHelper(getApplicationContext());
 
-    public int testX;
-    public int testY;
-    public int testZ;
-
     public void test(){
+        ArrayList<String> tables = database.getTableNames();
+        ArrayList<String> rpFPs = database.GetRPFPs();
+        ArrayList<String> testFPs = database.GetTestFPs();
+        int i =1;
 
-        // initialize the database and use this to access / add, get, etc
-        DataHelper database = new DataHelper(getApplicationContext());
-        // FPDataHelper database = new FPDataHelper(this);
-        // FPDataHelper database = new FPDataHelper(geContext());
-        // FPDataHelper database = new FPDataHelper(getContext());
+
+
 
 
 
@@ -111,8 +109,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void AddPoint(View v){
-        Log.d("AddPoint","In  ("+testX+","+testY+","+testZ+")");
-
         // get the input fields
         EditText viewX = (EditText) findViewById(R.id.InputX);
         EditText viewY = (EditText) findViewById(R.id.InputY);
@@ -121,9 +117,9 @@ public class MainActivity extends AppCompatActivity {
         // Check that X,Y,Z have been inputted /not null
         if(viewX.length()>0 && viewY.length()>0 && viewZ.length()>0 ){
             // get the position values from the input text fields
-            Integer inputX = Integer.parseInt(viewX.getText().toString());
-            Integer inputY = Integer.parseInt(viewY.getText().toString());
-            Integer inputZ = Integer.parseInt(viewZ.getText().toString());
+            Double inputX = Double.parseDouble(viewX.getText().toString());
+            Double inputY = Double.parseDouble(viewY.getText().toString());
+            Double inputZ = Double.parseDouble(viewZ.getText().toString());
 
             // create fingerprint with WAPs and position
             Fingerprint fp = new Fingerprint(getWAPs());
@@ -137,18 +133,14 @@ public class MainActivity extends AppCompatActivity {
             ((EditText) findViewById(R.id.InputY)).setText("");
             //((EditText) findViewById(R.id.InputZ)).setText("");
 
-            testX = inputX;
-            testY = inputY;
-            testZ = inputZ;
-            Log.d("AddReferencePoint","Out ("+testX+","+testY+","+testZ+")");
+            Log.d("AddReferencePoint","("+inputX+","+inputY+","+inputZ+")");
         } else {
             // input of point not complete, must contain X,Y,Z
         }
     }
 
     public void GetPoint(View v) {
-        Log.d("AddTestPoint","In  ("+testX+","+testY+","+testZ+")");
-
+        test();
         // get the input fields
         EditText viewX = (EditText) findViewById(R.id.InputX);
         EditText viewY = (EditText) findViewById(R.id.InputY);
@@ -157,9 +149,9 @@ public class MainActivity extends AppCompatActivity {
         // Check that X,Y,Z have been inputted /not null
         if(viewX.length()>0 && viewY.length()>0 && viewZ.length()>0 ){
             // get the position values from the input text fields
-            Integer inputX = Integer.parseInt(viewX.getText().toString());
-            Integer inputY = Integer.parseInt(viewY.getText().toString());
-            Integer inputZ = Integer.parseInt(viewZ.getText().toString());
+            Double inputX = Double.parseDouble(viewX.getText().toString());
+            Double inputY = Double.parseDouble(viewY.getText().toString());
+            Double inputZ = Double.parseDouble(viewZ.getText().toString());
 
             // create fingerprint with WAPs and position
             Fingerprint fp = new Fingerprint(getWAPs());
@@ -173,14 +165,10 @@ public class MainActivity extends AppCompatActivity {
             ((EditText) findViewById(R.id.InputY)).setText("");
             //((EditText) findViewById(R.id.InputZ)).setText("");
 
-            testX = inputX;
-            testY = inputY;
-            testZ = inputZ;
-            Log.d("AddTestPoint","Out ("+testX+","+testY+","+testZ+")");
+            Log.d("AddTestPoint","("+inputX+","+inputY+","+inputZ+")");
         } else {
             // input of point not complete, must contain X,Y,Z
         }
-
     }
 
     public void GetPoint_(View v){
@@ -342,7 +330,7 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.OutputZ_WC)).setText("" + estZ_WC);
 
 
-        Log.d("GetPoint", "Out  (" + testX + "," + testY + "," + testZ + ")");
+        //Log.d("GetPoint", "Out  (" + testX + "," + testY + "," + testZ + ")");
 
         //((Button) v).setText("executed");
     }
@@ -365,7 +353,6 @@ public class MainActivity extends AppCompatActivity {
 
             String ssid = WifiConnection.getSSID(); // SSID of connected network
             ConnectedSSID = ssid.replaceAll("^\"|\"$", "");; // remove "quote marks"
-
 
             TextView outputSSID = (TextView)findViewById(R.id.OutputSSID);
             outputSSID.setText(""+ConnectedSSID);

@@ -141,7 +141,8 @@ public class Fingerprint {
         String y = fiveDigit(location.Y);
         String z = fiveDigit(location.Z);
         String xyz = x+y+z;
-        return "" + fiveDigit(location.X) + "." + fiveDigit(location.Y) + "." + fiveDigit(location.Z);
+        return "" + x + "." + y + "." + z;
+        //return "" + fiveDigit(location.X) + "." + fiveDigit(location.Y) + "." + fiveDigit(location.Z);
     }
 
     /**

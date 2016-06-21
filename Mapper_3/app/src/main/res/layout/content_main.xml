@@ -49,10 +49,10 @@
                 <EditText
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:inputType="number"
+                    android:inputType="numberDecimal"
                     android:ems="10"
                     android:id="@+id/InputX"
-                    android:layout_column="2" />
+                    android:layout_column="3" />
             </TableRow>
 
             <TableRow
@@ -70,10 +70,11 @@
                 <EditText
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:inputType="number"
+                    android:inputType="numberDecimal"
                     android:ems="10"
                     android:id="@+id/InputY"
-                    android:layout_column="2" />
+                    android:layout_column="3" />
+
             </TableRow>
 
             <TableRow
@@ -91,10 +92,10 @@
                 <EditText
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:inputType="number"
+                    android:inputType="numberDecimal"
                     android:ems="10"
                     android:id="@+id/InputZ"
-                    android:layout_column="2" />
+                    android:layout_column="3" />
             </TableRow>
 
             <TableRow

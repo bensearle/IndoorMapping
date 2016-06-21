@@ -25,38 +25,71 @@ public class DataHelper extends SQLiteOpenHelper {
 
     private static final String TYPE_TEXT = " TEXT ";
     private static final String TYPE_INTEGER = " INTEGER ";
+    private static final String TYPE_REAL = " REAL ";
     private static final String COMMA = ",";
 
-    private static final String SQL_CREATE_ENTRIES =
+    private static final String SQL_CREATE_RPDATA_TABLE =
             "CREATE TABLE " + FPDataEntry.TABLE_NAME + " (" +
                     FPDataEntry._ID + " INTEGER PRIMARY KEY," +
                     FPDataEntry.COLUMN_NAME_FPTAG + TYPE_TEXT + COMMA +
-                    FPDataEntry.COLUMN_NAME_X + TYPE_INTEGER + COMMA +
-                    FPDataEntry.COLUMN_NAME_Y + TYPE_INTEGER + COMMA +
-                    FPDataEntry.COLUMN_NAME_Z + TYPE_INTEGER + COMMA +
+                    FPDataEntry.COLUMN_NAME_X + TYPE_REAL + COMMA +
+                    FPDataEntry.COLUMN_NAME_Y + TYPE_REAL + COMMA +
+                    FPDataEntry.COLUMN_NAME_Z + TYPE_REAL + COMMA +
                     FPDataEntry.COLUMN_NAME_BSSID + TYPE_TEXT + COMMA +
                     FPDataEntry.COLUMN_NAME_RSSI + TYPE_INTEGER +
             " )";
 
-    private static final String SQL_DELETE_ENTRIES =
+    private static final String SQL_CREATE_TESTDATA_TABLE =
+            "CREATE TABLE " + TestDataEntry.TABLE_NAME + " (" +
+                    TestDataEntry._ID + " INTEGER PRIMARY KEY," +
+                    TestDataEntry.COLUMN_NAME_FPTAG + TYPE_TEXT + COMMA +
+                    TestDataEntry.COLUMN_NAME_X + TYPE_REAL + COMMA +
+                    TestDataEntry.COLUMN_NAME_Y + TYPE_REAL + COMMA +
+                    TestDataEntry.COLUMN_NAME_Z + TYPE_REAL + COMMA +
+                    TestDataEntry.COLUMN_NAME_BSSID + TYPE_TEXT + COMMA +
+                    TestDataEntry.COLUMN_NAME_RSSI + TYPE_INTEGER +
+                    " )";
+
+    private static final String SQL_DELETE_RPDATA_ENTRIES =
             "DROP TABLE IF EXISTS " + FPDataEntry.TABLE_NAME;
+
+    private static final String SQL_DELETE_TESTDATA_ENTRIES =
+            "DROP TABLE IF EXISTS " + TestDataEntry.TABLE_NAME;
 
     public DataHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        //onUpgrade(this.getWritableDatabase(),1,1);
     }
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(SQL_CREATE_ENTRIES);
+        db.execSQL(SQL_CREATE_RPDATA_TABLE);
+        db.execSQL(SQL_CREATE_TESTDATA_TABLE);
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // This database is only a cache for online data, so its upgrade policy is
         // to simply to discard the data and start over
-        db.execSQL(SQL_DELETE_ENTRIES);
+        db.execSQL(SQL_DELETE_RPDATA_ENTRIES);
+        db.execSQL(SQL_DELETE_TESTDATA_ENTRIES);
         onCreate(db);
     }
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
     }
 
+
+    public ArrayList<String> getTableNames() {
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        Cursor results = db.rawQuery("SELECT name FROM sqlite_master WHERE type='table'", null);
+
+        ArrayList<String> tables = new ArrayList<String>();
+        for(results.moveToFirst(); !results.isAfterLast(); results.moveToNext()) {
+            // get string of data in column 0
+            tables.add(results.getString(0));
+        }
+
+        return tables;
+
+    }
 
     /*
      * ACCESSING THE REFERENCE POINT DATA
@@ -187,7 +220,49 @@ public class DataHelper extends SQLiteOpenHelper {
                 sortOrder               // sort order
         );
 
+
+        ArrayList<String> fpTAGs = new ArrayList<String>();
+        for(results.moveToFirst(); !results.isAfterLast(); results.moveToNext()) {
+            // get string of data in column 0
+            fpTAGs.add(results.getString(0));
+        }
+
         return results;
+    }
+
+    public ArrayList<String> GetRPFPs(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {
+                FPDataEntry.COLUMN_NAME_FPTAG,
+                FPDataEntry.COLUMN_NAME_X,
+                FPDataEntry.COLUMN_NAME_Y,
+                FPDataEntry.COLUMN_NAME_Z
+        };
+        String selection = "";
+        String selectionArgs[] = {};
+        String groupBy = null;
+        String filter = null; // HAVING clause
+        String sortOrder = FPDataEntry.COLUMN_NAME_FPTAG + " DESC";
+
+        Cursor results = db.query(
+                true,
+                FPDataEntry.TABLE_NAME, // table to query
+                columns,                // columns to return
+                selection,              // columns for the WHERE clause
+                selectionArgs,          // values for the WHERE clause
+                groupBy,                // group the rows
+                filter,                 // filter by row groups
+                sortOrder,              // sort order
+                null
+        );
+
+        ArrayList<String> fpTAGs = new ArrayList<String>();
+        for(results.moveToFirst(); !results.isAfterLast(); results.moveToNext()) {
+            // get string of data in column 0
+            fpTAGs.add(results.getString(0));
+        }
+
+        return fpTAGs;
     }
 
     /*
@@ -244,7 +319,7 @@ public class DataHelper extends SQLiteOpenHelper {
         String sortOrder = TestDataEntry.COLUMN_NAME_FPTAG + " DESC";
 
         Cursor results = db.query(
-                FPDataEntry.TABLE_NAME, // table to query
+                TestDataEntry.TABLE_NAME, // table to query
                 columns,                // columns to return
                 selection,              // columns for the WHERE clause
                 selectionArgs,          // values for the WHERE clause
@@ -261,7 +336,7 @@ public class DataHelper extends SQLiteOpenHelper {
      * get the list of test points
      * @return
      */
-    public Cursor GetTestFPs(){
+    public ArrayList<String> GetTestFPs(){
         SQLiteDatabase db = this.getReadableDatabase();
         String[] columns = {
                 TestDataEntry.COLUMN_NAME_FPTAG,
@@ -286,7 +361,14 @@ public class DataHelper extends SQLiteOpenHelper {
                 sortOrder,              // sort order
                 null                    // limit the number of rows
         );
-        return results;
+
+        ArrayList<String> fpTAGs = new ArrayList<String>();
+        for(results.moveToFirst(); !results.isAfterLast(); results.moveToNext()) {
+            // get string of data in column 0
+            fpTAGs.add(results.getString(0));
+        }
+
+        return fpTAGs;
     }
 
     public void DeleteAll(){
