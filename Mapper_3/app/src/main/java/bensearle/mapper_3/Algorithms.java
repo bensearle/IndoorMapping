@@ -45,6 +45,14 @@ public class Algorithms {
         return d;
     }
 
+    public static double Distance (Point3D p1, Point3D p2) {
+        double x = Math.pow(p1.X - p2.X, 2.0);
+        double y = Math.pow(p1.Y - p2.Y, 2.0);
+        double z = Math.pow(p1.Z - p2.Z, 2.0);
+        double d = Math.sqrt(x + y + z);
+        return d;
+    }
+
     public void CircleIntercetion(Circle3D circle1, Circle3D circle2){
 
     }

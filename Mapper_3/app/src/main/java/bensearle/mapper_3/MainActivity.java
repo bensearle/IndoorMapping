@@ -140,7 +140,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void GetPoint(View v) {
-        test();
+        //database.DeleteAll();
+        //test();
         // get the input fields
         EditText viewX = (EditText) findViewById(R.id.InputX);
         EditText viewY = (EditText) findViewById(R.id.InputY);

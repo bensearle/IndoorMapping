@@ -39,6 +39,9 @@ public class Fingerprint {
 
     Pair<Integer, String> simplePair = new Pair<>(42, "Second");
 
+
+    public Fingerprint() {}
+
     /**
      * Initializer for fingerprint, where location is unknown
      * @param waps wireless access points (BSSID & RSSI)

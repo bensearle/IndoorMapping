@@ -374,5 +374,6 @@ public class DataHelper extends SQLiteOpenHelper {
     public void DeleteAll(){
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("delete from "+ FPDataEntry.TABLE_NAME);
+        db.execSQL("delete from "+ TestDataEntry.TABLE_NAME);
     }
 }
