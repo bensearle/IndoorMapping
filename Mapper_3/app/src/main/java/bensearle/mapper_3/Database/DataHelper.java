@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
 
-import bensearle.mapper_3.Database.FPDataContract.FPDataEntry;
+import bensearle.mapper_3.Database.DataContract.*;
 import bensearle.mapper_3.Structures.Fingerprint;
 import bensearle.mapper_3.Structures.Point3D;
 
@@ -18,7 +18,7 @@ import bensearle.mapper_3.Structures.Point3D;
  * Created by bensearle on 22/05/2016.
  */
 
-public class FPDataHelper extends SQLiteOpenHelper {
+public class DataHelper extends SQLiteOpenHelper {
     // If you change the database schema, you must increment the database version.
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "FingerprintDatabase.db";
@@ -41,7 +41,7 @@ public class FPDataHelper extends SQLiteOpenHelper {
     private static final String SQL_DELETE_ENTRIES =
             "DROP TABLE IF EXISTS " + FPDataEntry.TABLE_NAME;
 
-    public FPDataHelper(Context context) {
+    public DataHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
     public void onCreate(SQLiteDatabase db) {
@@ -59,10 +59,8 @@ public class FPDataHelper extends SQLiteOpenHelper {
 
 
     /*
-     * ACCESSING THE DATABASE
+     * ACCESSING THE REFERENCE POINT DATA
      */
-
-
 
     public void AddFP(Fingerprint fingerprint){
         // TODO check location is not null
@@ -189,6 +187,105 @@ public class FPDataHelper extends SQLiteOpenHelper {
                 sortOrder               // sort order
         );
 
+        return results;
+    }
+
+    /*
+     * ACCESSING THE TEST DATA
+     */
+
+    public void AddTestFP(Fingerprint fingerprint){
+        // TODO check location is not null
+        String fptag = fingerprint.GetTag();
+        Point3D location = fingerprint.GetPosition();
+        Map<String, Integer> waps = fingerprint.GetWAPs();
+
+        // add each WAP to database, with fptag, location
+        for(Iterator i = waps.entrySet().iterator(); i.hasNext();) {
+            Map.Entry item = (Map.Entry) i.next();
+            String bssid = (String) item.getKey();
+            Integer rssi = (Integer) item.getValue();
+
+            addTestFPData(fptag, location, bssid, rssi); // add to DB
+        }
+    }
+
+    private boolean addTestFPData (String fptag, Point3D p, String bssid, Integer rssi)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(TestDataEntry.COLUMN_NAME_FPTAG, fptag);
+        contentValues.put(TestDataEntry.COLUMN_NAME_X, p.X);
+        contentValues.put(TestDataEntry.COLUMN_NAME_Y, p.Y);
+        contentValues.put(TestDataEntry.COLUMN_NAME_Z, p.Z);
+        contentValues.put(TestDataEntry.COLUMN_NAME_BSSID, bssid);
+        contentValues.put(TestDataEntry.COLUMN_NAME_RSSI, rssi);
+        long newRowID = db.insert(TestDataEntry.TABLE_NAME, null, contentValues);
+        return true;
+    }
+
+    public Cursor GetTestFingerprintByTag(String tag){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        String[] columns = {
+                TestDataEntry.COLUMN_NAME_FPTAG,
+                TestDataEntry.COLUMN_NAME_X,
+                TestDataEntry.COLUMN_NAME_Y,
+                TestDataEntry.COLUMN_NAME_Z,
+                TestDataEntry.COLUMN_NAME_BSSID,
+                TestDataEntry.COLUMN_NAME_RSSI
+        };
+
+        String selection = TestDataEntry.COLUMN_NAME_FPTAG+"=?";
+        String selectionArgs[] = {tag};
+
+        String groupBy = null;
+        String filter = null; // HAVING clause
+        String sortOrder = TestDataEntry.COLUMN_NAME_FPTAG + " DESC";
+
+        Cursor results = db.query(
+                FPDataEntry.TABLE_NAME, // table to query
+                columns,                // columns to return
+                selection,              // columns for the WHERE clause
+                selectionArgs,          // values for the WHERE clause
+                groupBy,                // group the rows
+                filter,                 // filter by row groups
+                sortOrder               // sort order
+        );
+
+        return results;
+    }
+
+
+    /**
+     * get the list of test points
+     * @return
+     */
+    public Cursor GetTestFPs(){
+        SQLiteDatabase db = this.getReadableDatabase();
+        String[] columns = {
+                TestDataEntry.COLUMN_NAME_FPTAG,
+                TestDataEntry.COLUMN_NAME_X,
+                TestDataEntry.COLUMN_NAME_Y,
+                TestDataEntry.COLUMN_NAME_Z
+        };
+        String selection = "";
+        String selectionArgs[] = {};
+        String groupBy = null;
+        String filter = null; // HAVING clause
+        String sortOrder = TestDataEntry.COLUMN_NAME_FPTAG + " DESC";
+
+        Cursor results = db.query(
+                true,                   // distinct
+                TestDataEntry.TABLE_NAME, // table to query
+                columns,                // columns to return
+                selection,              // columns for the WHERE clause
+                selectionArgs,          // values for the WHERE clause
+                groupBy,                // group the rows
+                filter,                 // filter by row groups
+                sortOrder,              // sort order
+                null                    // limit the number of rows
+        );
         return results;
     }
 

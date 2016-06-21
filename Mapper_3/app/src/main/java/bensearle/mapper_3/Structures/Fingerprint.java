@@ -21,7 +21,7 @@ import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
-import bensearle.mapper_3.Database.FPDataContract;
+import bensearle.mapper_3.Database.DataContract;
 
 /**
  * Created by bensearle on 19/05/2016.
@@ -137,33 +137,37 @@ public class Fingerprint {
      * @return string in form XXXYYYZZZ
      */
     public String GetTag(){
-        String x = threeDigit(location.X);
-        String y = threeDigit(location.Y);
-        String z = threeDigit(location.Z);
+        String x = fiveDigit(location.X);
+        String y = fiveDigit(location.Y);
+        String z = fiveDigit(location.Z);
         String xyz = x+y+z;
-        return "" + threeDigit(location.X) + threeDigit(location.Y) + threeDigit(location.Z);
+        return "" + fiveDigit(location.X) + "." + fiveDigit(location.Y) + "." + fiveDigit(location.Z);
     }
 
     /**
-     * create string of length 3 for int. 1 --> 001
+     * create string of length 5 for double. 1 --> 00100, 10.1 --> 01010
      * @param n is the number to be converted
      * @return 3 digit string of number
      */
-    private String threeDigit(double n){
-        int number = (int) n;
+    private String fiveDigit(double n){
+        int number = Math.round((int) (n * 100));
         String s = ""+number;
         int length = s.length();
 
         if (length<1){
-            return "000";
+            return "00000";
         } else if (length<2){
-            return "00" + number;
+            return "0000" + number;
         } else if (length<3){
-            return "0" + number;
+            return "000" + number;
         } else if (length<4){
+            return "00"+ number;}
+        else if (length<5){
+            return "0"+ number;}
+        else if (length<6){
             return ""+ number;
         } else {
-            // number is longer than 3 digits
+            // number is longer than 5 digits
             return "***";
         }
     }

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 
-import bensearle.mapper_3.Database.FPDataHelper;
+import bensearle.mapper_3.Database.DataHelper;
 import bensearle.mapper_3.Structures.Circle3D;
 import bensearle.mapper_3.Structures.CircleCluster;
 import bensearle.mapper_3.Structures.Fingerprint;
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    FPDataHelper database; // = new FPDataHelper(getApplicationContext());
+    DataHelper database; // = new FPDataHelper(getApplicationContext());
 
     public int testX;
     public int testY;
@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
     public void test(){
 
         // initialize the database and use this to access / add, get, etc
-        FPDataHelper database = new FPDataHelper(getApplicationContext());
+        DataHelper database = new DataHelper(getApplicationContext());
         // FPDataHelper database = new FPDataHelper(this);
         // FPDataHelper database = new FPDataHelper(geContext());
         // FPDataHelper database = new FPDataHelper(getContext());
@@ -132,24 +132,58 @@ public class MainActivity extends AppCompatActivity {
             // add fingerprint to database
             database.AddFP(fp);
 
-            // show acknowledgement to use that point has been added successfully
-            // TO DO
-
             // clear text boxes
             ((EditText) findViewById(R.id.InputX)).setText("");
             ((EditText) findViewById(R.id.InputY)).setText("");
-            ((EditText) findViewById(R.id.InputZ)).setText("");
+            //((EditText) findViewById(R.id.InputZ)).setText("");
 
             testX = inputX;
             testY = inputY;
             testZ = inputZ;
-            Log.d("AddPoint","Out ("+testX+","+testY+","+testZ+")");
+            Log.d("AddReferencePoint","Out ("+testX+","+testY+","+testZ+")");
         } else {
             // input of point not complete, must contain X,Y,Z
         }
     }
 
-    public void GetPoint(View v){
+    public void GetPoint(View v) {
+        Log.d("AddTestPoint","In  ("+testX+","+testY+","+testZ+")");
+
+        // get the input fields
+        EditText viewX = (EditText) findViewById(R.id.InputX);
+        EditText viewY = (EditText) findViewById(R.id.InputY);
+        EditText viewZ = (EditText) findViewById(R.id.InputZ);
+
+        // Check that X,Y,Z have been inputted /not null
+        if(viewX.length()>0 && viewY.length()>0 && viewZ.length()>0 ){
+            // get the position values from the input text fields
+            Integer inputX = Integer.parseInt(viewX.getText().toString());
+            Integer inputY = Integer.parseInt(viewY.getText().toString());
+            Integer inputZ = Integer.parseInt(viewZ.getText().toString());
+
+            // create fingerprint with WAPs and position
+            Fingerprint fp = new Fingerprint(getWAPs());
+            fp.SetPostion(inputX, inputY, inputZ);
+
+            // add fingerprint to database
+            database.AddTestFP(fp);
+
+            // clear text boxes
+            ((EditText) findViewById(R.id.InputX)).setText("");
+            ((EditText) findViewById(R.id.InputY)).setText("");
+            //((EditText) findViewById(R.id.InputZ)).setText("");
+
+            testX = inputX;
+            testY = inputY;
+            testZ = inputZ;
+            Log.d("AddTestPoint","Out ("+testX+","+testY+","+testZ+")");
+        } else {
+            // input of point not complete, must contain X,Y,Z
+        }
+
+    }
+
+    public void GetPoint_(View v){
 
         // Log.d("GetPoint","In  ("+testX+","+testY+","+testZ+")");
 
@@ -344,7 +378,7 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("RefreshNetwork", "Initialise database");
         // connect to database
-        database = new FPDataHelper(getApplicationContext());
+        database = new DataHelper(getApplicationContext());
         Cursor databasedata = database.GetAll();
 
         //database.DeleteAll();
