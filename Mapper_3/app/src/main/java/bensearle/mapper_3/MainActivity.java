@@ -20,6 +20,8 @@ import android.widget.EditText;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
+import junit.framework.Test;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -93,22 +95,49 @@ public class MainActivity extends AppCompatActivity {
 
     DataHelper database; // = new FPDataHelper(getApplicationContext());
 
+    boolean toTest = true;
+
     public void test(){
-        ArrayList<String> tables = database.getTableNames();
-        ArrayList<String> rpFPs = database.GetRPFPs();
+
+        //Testing.RunEDTests(database);
+
+        //database.deleteRP("00100.00100.00000");
+        //database.deleteRP("00100.00200.00000");
+
+        //database.fix();
+        //ArrayList<String> tables = database.getTableNames();
+        //ArrayList<String> rpFPs = database.GetRPFPs();
         ArrayList<String> testFPs = database.GetTestFPs();
         int i =1;
 
 
+        //Testing.RunEDTests(database);
+        Testing.RunLocalisationTests(database);
 
+        //database.moveTable();
+        ArrayList<String> rpFPs_ = database.GetRPFPs();
+        ArrayList<String> testFPs_ = database.GetTestFPs();
 
-
+        i=2;
 
 
 
     }
 
+    private int ackCount = 0;
+    private void acknowledge(){
+        ackCount ++;
+        ((TextView) findViewById(R.id.AckCounter)).setText(""+ackCount);
+
+
+    }
+
     public void AddPoint(View v){
+        RefreshNetwork(v);
+        ArrayList<String> tables = database.getTableNames();
+        ArrayList<String> rpFPs = database.GetRPFPs();
+        ArrayList<String> testFPs = database.GetTestFPs();
+
         // get the input fields
         EditText viewX = (EditText) findViewById(R.id.InputX);
         EditText viewY = (EditText) findViewById(R.id.InputY);
@@ -129,17 +158,22 @@ public class MainActivity extends AppCompatActivity {
             database.AddFP(fp);
 
             // clear text boxes
-            ((EditText) findViewById(R.id.InputX)).setText("");
-            ((EditText) findViewById(R.id.InputY)).setText("");
+            //((EditText) findViewById(R.id.InputX)).setText("");
+            //((EditText) findViewById(R.id.InputY)).setText("");
             //((EditText) findViewById(R.id.InputZ)).setText("");
 
+            acknowledge();
             Log.d("AddReferencePoint","("+inputX+","+inputY+","+inputZ+")");
         } else {
             // input of point not complete, must contain X,Y,Z
         }
     }
 
+
+
     public void GetPoint(View v) {
+        RefreshNetwork(v);
+
         //database.DeleteAll();
         //test();
         // get the input fields
@@ -162,10 +196,11 @@ public class MainActivity extends AppCompatActivity {
             database.AddTestFP(fp);
 
             // clear text boxes
-            ((EditText) findViewById(R.id.InputX)).setText("");
-            ((EditText) findViewById(R.id.InputY)).setText("");
+            //((EditText) findViewById(R.id.InputX)).setText("");
+            //((EditText) findViewById(R.id.InputY)).setText("");
             //((EditText) findViewById(R.id.InputZ)).setText("");
 
+            acknowledge();
             Log.d("AddTestPoint","("+inputX+","+inputY+","+inputZ+")");
         } else {
             // input of point not complete, must contain X,Y,Z
@@ -320,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
          * localization algorithm: weighted coordinates
          */
         Square3D square = new Square3D(sortedDistances, fingerprintAndDistance);
-        Point3D estimatedPoint_WC = square.Localise();
+        Point3D estimatedPoint_WC = square.Localise(true);
 
         // output estimate to gui
         double estX_WC = Math.round (estimatedPoint_WC.X * 100.0) / 100.0;
@@ -345,6 +380,12 @@ public class MainActivity extends AppCompatActivity {
      * @param v from button click
      */
     public void RefreshNetwork(View v){
+        database = new DataHelper(getApplicationContext());
+
+        if (toTest){
+            test();
+        }
+
         Log.d("RefreshNetwork", "Start Refreshing Network");
         Wifi = (WifiManager) getSystemService(Context.WIFI_SERVICE);
 
@@ -366,11 +407,12 @@ public class MainActivity extends AppCompatActivity {
 
         Log.d("RefreshNetwork", "Initialise database");
         // connect to database
-        database = new DataHelper(getApplicationContext());
         Cursor databasedata = database.GetAll();
 
         //database.DeleteAll();
         Log.d("RefreshNetwork", "Database initialised");
+
+
     }
 
     /**

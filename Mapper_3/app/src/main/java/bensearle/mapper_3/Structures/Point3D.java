@@ -43,6 +43,18 @@ public class Point3D {
 
     }
 
+    public String toCSV (){
+        if (X == null || Y == null || Z == null){
+            return ",,,";
+        }
+        else {
+            return "" + Math.round(X * 100.0) / 100.0 + "," +
+                    Math.round(Y * 100.0) / 100.0 + "," +
+                    Math.round(Z * 100.0) / 100.0 + ",";
+
+        }
+    }
+
     public boolean equals (Point3D p){
         return (X == p.X) && (Y == p.Y) && (Z == p.Z);
     }

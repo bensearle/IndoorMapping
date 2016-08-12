@@ -24,8 +24,8 @@ public class Circle3D {
 
     public Circle3D (Point3D centre, double r){
         Centre = centre;
-        Radius = r;
-        Distance = r;
+        Radius = r * UserVariables.INCREASING_CIRCLES_FACTOR;
+        Distance = r * UserVariables.INCREASING_CIRCLES_FACTOR;
     }
 
     /**
@@ -39,7 +39,7 @@ public class Circle3D {
     }
 
     public Circle3D Grow (){
-        Radius += UserVariables.INCREASING_CIRCLES_FACTOR * Distance;
+        Radius += Distance;
         return this;
     }
 }

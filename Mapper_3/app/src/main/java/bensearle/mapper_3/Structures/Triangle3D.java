@@ -12,6 +12,7 @@ public class Triangle3D {
     public Point3D Point2;
     public Point3D Point3;
 
+    public boolean canLocalise = false;
     // Euclidean distance between RPs and current fingerprint
     public double Distance1;
     public double Distance2;
@@ -42,12 +43,12 @@ public class Triangle3D {
      * @return the centre point of the smallest circle
      */
     public Point3D Localise(){
-        boolean canBeSmaller = true;
-        while (canBeSmaller){
-            canBeSmaller = DecreaseSize();
-            this.GetCentroid(); // calculate new centre point
+        if (canLocalise) {
+            while (DecreaseSize()) ; // while the triangle can decrease size, keep decreasing size
+            return GetCentroid();
+        } else {
+            return new Point3D();
         }
-        return this.GetCentroid();
     }
 
     public boolean DecreaseSize() {
@@ -113,6 +114,7 @@ public class Triangle3D {
         } else if (Point3==null){
             Point3 = point;
             Distance3 = distance;
+            canLocalise = true;
         } else {
             // all points have been set
         }

@@ -20,10 +20,10 @@ public class Square3D {
     private Point3D pBR;
 
     // distance of each corner
-    private double dTL;
-    private double dTR;
-    private double dBL;
-    private double dBR;
+    private Double dTL;
+    private Double dTR;
+    private Double dBL;
+    private Double dBR;
     private double dTotal;
 
     private double zcoord = 0;
@@ -31,6 +31,8 @@ public class Square3D {
     private double maxX;
     private double minY;
     private double maxY;
+
+    private boolean canLocalise = false;
 
     public Square3D(){
 
@@ -126,25 +128,30 @@ public class Square3D {
                 }
 
             } else if (corners==3){
-                if (corner4.equals(fp.GetPosition())){
+                if (corner4.X.equals(fp.GetPosition().X) && corner4.Y.equals(fp.GetPosition().Y)){
                     d4 = distance; // add the distance of the first corner
                     corners++;
+                    canLocalise = true; // square now has 4 corners and can be localised
                 }
             }
 
         }
-        // TODO put corners to top/bottom left/right
-        minX = Algorithms.min(corner1.X, corner2.X, corner3.X, corner4.X);
-        maxX = Algorithms.max(corner1.X, corner2.X, corner3.X, corner4.X);
-        minY = Algorithms.min(corner1.Y, corner2.Y, corner3.Y, corner4.Y);
-        maxY = Algorithms.max(corner1.Y, corner2.Y, corner3.Y, corner4.Y);
 
-        assignCorner(corner1, d1);
-        assignCorner(corner2, d2);
-        assignCorner(corner3, d3);
-        assignCorner(corner4, d4);
 
-        dTotal = d1 + d2 + d3 + d4;
+        if (canLocalise){
+            minX = Algorithms.min(corner1.X, corner2.X, corner3.X, corner4.X);
+            maxX = Algorithms.max(corner1.X, corner2.X, corner3.X, corner4.X);
+            minY = Algorithms.min(corner1.Y, corner2.Y, corner3.Y, corner4.Y);
+            maxY = Algorithms.max(corner1.Y, corner2.Y, corner3.Y, corner4.Y);
+
+            assignCorner(corner1, d1);
+            assignCorner(corner2, d2);
+            assignCorner(corner3, d3);
+            assignCorner(corner4, d4);
+
+            dTotal = d1 + d2 + d3 + d4;
+        }
+
     }
 
     /**
@@ -172,105 +179,116 @@ public class Square3D {
         }
     }
 
-    public Point3D Localise (){
+    public Point3D Localise (boolean considerOverlap){
 
-        // weight the coordinates by their distance and move closer to the centre
-        pTL = new Point3D(pTL.X + dTL/dTotal * UserVariables.GRID_THICKNESS,
-                pTL.Y + dTL/dTotal * UserVariables.GRID_THICKNESS, zcoord);
-        pTR = new Point3D(pTR.X - dTR/dTotal * UserVariables.GRID_THICKNESS,
-                pTR.Y + dTR/dTotal * UserVariables.GRID_THICKNESS, zcoord);
-        pBL = new Point3D(pBL.X + dBL/dTotal * UserVariables.GRID_THICKNESS,
-                pBL.Y - dBL/dTotal * UserVariables.GRID_THICKNESS, zcoord);
-        pBR = new Point3D(pBR.X - dBR/dTotal * UserVariables.GRID_THICKNESS,
-                pBR.Y - dBR/dTotal * UserVariables.GRID_THICKNESS, zcoord);
+        if (canLocalise){
+            // weight the coordinates by their distance and move closer to the centre
+            pTL = new Point3D(pTL.X + dTL / dTotal * UserVariables.GRID_THICKNESS,
+                    pTL.Y + dTL / dTotal * UserVariables.GRID_THICKNESS, zcoord);
+            pTR = new Point3D(pTR.X - dTR / dTotal * UserVariables.GRID_THICKNESS,
+                    pTR.Y + dTR / dTotal * UserVariables.GRID_THICKNESS, zcoord);
+            pBL = new Point3D(pBL.X + dBL / dTotal * UserVariables.GRID_THICKNESS,
+                    pBL.Y - dBL / dTotal * UserVariables.GRID_THICKNESS, zcoord);
+            pBR = new Point3D(pBR.X - dBR / dTotal * UserVariables.GRID_THICKNESS,
+                    pBR.Y - dBR / dTotal * UserVariables.GRID_THICKNESS, zcoord);
 
 
-        // find whether the new coordinates have passed eachother on the x or y axis
-        List<Double> underlapX = new ArrayList<Double>();
-        List<Double> underlapY = new ArrayList<Double>();
-        List<Double> overlapX = new ArrayList<Double>();
-        List<Double> overlapY = new ArrayList<Double>();
+            if(!considerOverlap) {
+                // not considering overlap
+                double estX = (pTL.X + pTR.X + pBL.X + pBR.X) / 4;
+                double estY = (pTL.Y + pTR.Y + pBL.Y + pBR.Y) / 4;
 
-        if (pTL.X < pTR.X){
-            underlapX.add(pTL.X);
-            underlapX.add(pTR.X);
-        } else {
-            overlapX.add(pTL.X);
-            overlapX.add(pTR.X);
-        }
+                return new Point3D(estX, estY, zcoord);
 
-        if (pBL.X < pBR.X){
-            underlapX.add(pBL.X);
-            underlapX.add(pBR.X);
-        } else {
-            overlapX.add(pBL.X);
-            overlapX.add(pBR.X);
-        }
-
-        if (pTL.Y < pBL.Y){
-            underlapX.add(pTL.Y);
-            underlapX.add(pBL.Y);
-        } else {
-            overlapX.add(pTL.Y);
-            overlapX.add(pBL.Y);
-        }
-
-        if (pTR.Y < pBR.Y){
-            underlapX.add(pTR.Y);
-            underlapX.add(pBR.Y);
-        } else {
-            overlapX.add(pTR.Y);
-            overlapX.add(pBR.Y);
-        }
-
-        // estimate point
-        double estX = 0;
-        double estY = 0;
-
-        if (underlapX.size() > 0){
-            double total = 0;
-            double count = 0;
-            for(Iterator<Double> i = underlapX.iterator(); i.hasNext(); ) {
-                double item = i.next();
-                total += item;
-                count++;
             }
-            estX = total/count;
-        } else if (overlapX.size() > 0){
-            double total = 0;
-            double count = 0;
-            for(Iterator<Double> i = overlapX.iterator(); i.hasNext(); ) {
-                double item = i.next();
-                total += item;
-                count++;
+            // else
+            // considering overlap
+
+            // find whether the new coordinates have passed eachother on the x or y axis
+            List<Double> underlapX = new ArrayList<Double>();
+            List<Double> underlapY = new ArrayList<Double>();
+            List<Double> overlapX = new ArrayList<Double>();
+            List<Double> overlapY = new ArrayList<Double>();
+
+            if (pTL.X < pTR.X) {
+                underlapX.add(pTL.X);
+                underlapX.add(pTR.X);
+            } else {
+                overlapX.add(pTL.X);
+                overlapX.add(pTR.X);
             }
-            estX = total/count;
+
+            if (pBL.X < pBR.X) {
+                underlapX.add(pBL.X);
+                underlapX.add(pBR.X);
+            } else {
+                overlapX.add(pBL.X);
+                overlapX.add(pBR.X);
+            }
+
+            if (pTL.Y < pBL.Y) {
+                underlapY.add(pTL.Y);
+                underlapY.add(pBL.Y);
+            } else {
+                overlapY.add(pTL.Y);
+                overlapY.add(pBL.Y);
+            }
+
+            if (pTR.Y < pBR.Y) {
+                underlapY.add(pTR.Y);
+                underlapY.add(pBR.Y);
+            } else {
+                overlapY.add(pTR.Y);
+                overlapY.add(pBR.Y);
+            }
+
+            // estimate point
+            double estX = 0;
+            double estY = 0;
+
+            if (underlapX.size() > 0) {
+                double total = 0;
+                double count = 0;
+                for (Iterator<Double> i = underlapX.iterator(); i.hasNext(); ) {
+                    double item = i.next();
+                    total += item;
+                    count++;
+                }
+                estX = total / count;
+            } else if (overlapX.size() > 0) {
+                double total = 0;
+                double count = 0;
+                for (Iterator<Double> i = overlapX.iterator(); i.hasNext(); ) {
+                    double item = i.next();
+                    total += item;
+                    count++;
+                }
+                estX = total / count;
+            }
+
+            if (underlapY.size() > 0) {
+                double total = 0;
+                double count = 0;
+                for (Iterator<Double> i = underlapY.iterator(); i.hasNext(); ) {
+                    double item = i.next();
+                    total += item;
+                    count++;
+                }
+                estY = total / count;
+            } else if (overlapY.size() > 0) {
+                double total = 0;
+                double count = 0;
+                for (Iterator<Double> i = overlapY.iterator(); i.hasNext(); ) {
+                    double item = i.next();
+                    total += item;
+                    count++;
+                }
+                estY = total / count;
+            }
+
+            return new Point3D(estX, estY, zcoord);
+        } else { // doesn't have 4 corners
+            return new Point3D();
         }
-
-        if (underlapY.size() > 0){
-            double total = 0;
-            double count = 0;
-            for(Iterator<Double> i = underlapY.iterator(); i.hasNext(); ) {
-                double item = i.next();
-                total += item;
-                count++;
-            }
-            estY = total/count;
-        } else if (overlapY.size() > 0){
-            double total = 0;
-            double count = 0;
-            for(Iterator<Double> i = overlapY.iterator(); i.hasNext(); ) {
-                double item = i.next();
-                total += item;
-                count++;
-            }
-            estY = total/count;
-        }
-
-        //TODO test whether considering overlap improves accuracy, if not then use next 2 lines instead all the above
-        estX = (pTL.X + pTR.X + pBL.X + pBR.X) / 4;
-        estY = (pTL.Y + pTR.Y + pBL.Y + pBR.Y) / 4;
-
-        return new Point3D(estX, estY, zcoord);
     }
 }

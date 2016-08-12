@@ -1,5 +1,6 @@
 package bensearle.mapper_3;
 
+import android.database.Cursor;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -22,25 +23,42 @@ import bensearle.mapper_3.Structures.Triangle3D;
  */
 public class Testing {
 
-    public void RunEDTests(DataHelper database){
+    public static void RunEDTests(DataHelper database){
         //TODO get test data and then execute
-        Fingerprint fp = new Fingerprint();
         // get all fingeprints from db to test
 
         // test all test data
-        testEuclideanDistance(fp, "testdata", database);
+        ArrayList<String> testFPs = database.GetTestFPs();
+        for (String tag: testFPs){
+            Cursor c = database.GetTestFingerprintByTag(tag);
+            Fingerprint fp = new Fingerprint(c);
+            testEuclideanDistance(fp, "testdata", database);
+        }
+
 
         // test all map data
-        testEuclideanDistance(fp, "RPdata", database);
+        //testEuclideanDistance(fp, "RPdata", database);
 
     }
 
-    public void RunLocalisationTests(){
+    public static void RunLocalisationTests(DataHelper database){
         //TODO get test data and then execute and add to db
 
+        Fingerprint fp_ = new Fingerprint(database.GetTestFingerprintByTag("08400.02000.00140"));
+        testLocalisation(fp_, database);
+
+        int testi = 1;
+        ArrayList<String> testFPs = database.GetTestFPs();
+        for (String tag: testFPs){
+            Cursor c = database.GetTestFingerprintByTag(tag);
+            Fingerprint fp = new Fingerprint(c);
+            testLocalisation(fp, database);
+            testi++;
+        }
+
     }
 
-    private void testEuclideanDistance(Fingerprint currentFP, String inputType, DataHelper database){
+    private static void testEuclideanDistance(Fingerprint currentFP, String inputType, DataHelper database){
 
         // get waps from fingerprint 1
         String[] strongestWAPs = currentFP.GetStrongestNWaps(UserVariables.EUCLIDEAN_DISTANCE_POINTS);
@@ -84,14 +102,16 @@ public class Testing {
                 count++;
             }
 
+
+
             Point3D testLocation = currentFP.GetPosition();
             Point3D rpLocation = rpFingerprint.GetPosition();
             double map_distance = Algorithms.Distance(testLocation, rpLocation);
             //double geometric_distance = map_distance * 8; // maybe 8m is 1 grid width
             double euclidean_distance = Algorithms.Euclidean_Distance(rssiCurrentandRP); // get Euclidean distance
             Log.d("Euclidean Test,",
-                            "Loc1"+","+testLocation+","+
-                            "Loc2"+","+rpLocation+","+
+                            "Loc1"+","+testLocation.toCSV()+","+
+                            "Loc2"+","+rpLocation.toCSV()+","+
                             "MapD"+","+map_distance+","+
                             "EucD"+","+euclidean_distance+",");
 
@@ -100,7 +120,7 @@ public class Testing {
 
     }
 
-    private void testLocalisation(Fingerprint currentFP, DataHelper database){
+    private static void testLocalisation(Fingerprint currentFP, DataHelper database){
         // get similar fingerprints of reference points (RP) from database
         // RP fingerprints must have at least n WAPs the same as current fingerprint, n=EUCLIDEAN_DISTANCE_POINTS
         // use top n strongest WAPs of current fingerprint
@@ -149,19 +169,27 @@ public class Testing {
 
             // make sure distance is not already in map, as no duplicate keys. precision is lost
             while(fingerprintAndDistance.containsKey(distance)){
-                distance += Float.MIN_VALUE;
+                distance += 0.000001;
             }
 
             fingerprintAndDistance.put(distance, rpFingerprint); // store fingerprint and distance
         }
 
 
+        if (fingerprintAndDistance.size() < 2){
+            // cannot be localised
+            Log.d("Localisation",
+                    "Actual," + currentFP.GetPosition().toCSV()
+            );
+            return;
+        }
+
         List<Float> sortedDistances = new ArrayList(fingerprintAndDistance.keySet());
         Collections.sort(sortedDistances);
 
         /*
          * localization algorithm: decreasing triangles
-         */
+        */
 
         // using closest 3 RPs
         List<Float> closest3 = sortedDistances.subList(0, Math.min(3, sortedDistances.size())); // get the first 3 RP distances
@@ -170,10 +198,12 @@ public class Testing {
             Fingerprint fp = fingerprintAndDistance.get(distance);
             triangleClosest3.AddRP(fp.GetPosition(), distance); // add this position and distance to the triangle
         }
-        while(triangleClosest3.DecreaseSize()); // while the triangle can decrease size, keep decreasing size
-        Point3D estimatedPoint_DTClosest = triangleClosest3.GetCentroid();
-        Log.d("TD", "TD_Closest3: " + estimatedPoint_DTClosest.toString());
+        Point3D estimatedPoint_DTClosest = triangleClosest3.Localise();
 
+
+        //Log.d("TD", "TD_Closest3: " + estimatedPoint_DTClosest.toString());
+
+        /*
         // using furthest 3 RPs
         List<Float> furthest3 = sortedDistances.subList(Math.max(sortedDistances.size() - 3, 0), sortedDistances.size()); // get the last 3 RP distances
         Triangle3D triangleFurthest3 = new Triangle3D();
@@ -181,14 +211,14 @@ public class Testing {
             Fingerprint fp = fingerprintAndDistance.get(distance);
             triangleFurthest3.AddRP(fp.GetPosition(), distance); // add this position and distance to the triangle
         }
-        while(triangleFurthest3.DecreaseSize()); // while the triangle can decrease size, keep decreasing size
-        Point3D estimatedPoint_DTFurthest = triangleFurthest3.GetCentroid();
-        Log.d("TD", "TD_Furthest3: " + estimatedPoint_DTFurthest.toString());
+        Point3D estimatedPoint_DTFurthest = triangleFurthest3.Localise();
+        //Log.d("TD", "TD_Furthest3: " + estimatedPoint_DTFurthest.toString());
+        */
 
 
         /*
          * localization algorithm: overlapping circles
-         */
+        */
         CircleCluster circlesAll = new CircleCluster(sortedDistances, fingerprintAndDistance);
         Point3D estimatedPoint_OCAll = circlesAll.Localise();
 
@@ -199,9 +229,23 @@ public class Testing {
 
         /*
          * localization algorithm: weighted coordinates
-         */
+        */
         Square3D square = new Square3D(sortedDistances, fingerprintAndDistance);
-        Point3D estimatedPoint_WC = square.Localise();
+        Point3D estimatedPoint_WC = square.Localise(false);
+
+        Square3D square_lapping = new Square3D(sortedDistances, fingerprintAndDistance);
+        Point3D estimatedPoint_WC_lapping = square_lapping.Localise(true);
+
+        Log.d("Localisation",
+                ",Actual," + currentFP.GetPosition().toCSV() +
+                ",DT_closest," + estimatedPoint_DTClosest.toCSV() +
+                //"DT_furthest," + estimatedPoint_DTFurthest.toCSV() +
+                ",OC_all," + estimatedPoint_OCAll.toCSV() +
+                ",OC_top4," + estimatedPoint_OCTop4.toCSV() +
+                ",WC," + estimatedPoint_WC.toCSV() +
+                ",WC_lap," + estimatedPoint_WC_lapping.toCSV()
+        );
+
     }
 
 }

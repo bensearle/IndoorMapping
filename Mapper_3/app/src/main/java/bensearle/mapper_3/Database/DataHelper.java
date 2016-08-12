@@ -132,21 +132,23 @@ public class DataHelper extends SQLiteOpenHelper {
                 FPDataEntry.COLUMN_NAME_FPTAG
         };
 
-        String selection = FPDataEntry.COLUMN_NAME_BSSID+"=?";
-        String selectionArgs[] = {wapBSSID};
+        String selection = FPDataEntry.COLUMN_NAME_BSSID+"=? AND "+FPDataEntry.COLUMN_NAME_Z + "<? ";
+        String selectionArgs[] = {wapBSSID, "2"};
 
         String groupBy = null;
         String filter = null; // HAVING clause
         String sortOrder = FPDataEntry.COLUMN_NAME_FPTAG + " DESC";
 
         Cursor results = db.query(
+                true,                   // distinct
                 FPDataEntry.TABLE_NAME, // table to query
                 columns,                // columns to return
                 selection,              // columns for the WHERE clause
                 selectionArgs,          // values for the WHERE clause
                 groupBy,                // group the rows
                 filter,                 // filter by row groups
-                sortOrder               // sort order
+                sortOrder,               // sort order
+                null
         );
 
         ArrayList<String> fpTAGs = new ArrayList<String>();
@@ -170,8 +172,8 @@ public class DataHelper extends SQLiteOpenHelper {
                 FPDataEntry.COLUMN_NAME_RSSI
         };
 
-        String selection = FPDataEntry.COLUMN_NAME_FPTAG+"=?";
-        String selectionArgs[] = {tag};
+        String selection = FPDataEntry.COLUMN_NAME_FPTAG+"=? AND "+FPDataEntry.COLUMN_NAME_Z + "<? ";
+        String selectionArgs[] = {tag, "2"};
 
         String groupBy = null;
         String filter = null; // HAVING clause
@@ -238,8 +240,9 @@ public class DataHelper extends SQLiteOpenHelper {
                 FPDataEntry.COLUMN_NAME_Y,
                 FPDataEntry.COLUMN_NAME_Z
         };
-        String selection = "";
-        String selectionArgs[] = {};
+
+        String selection = FPDataEntry.COLUMN_NAME_Z + "<?";
+        String selectionArgs[] = {"2"};
         String groupBy = null;
         String filter = null; // HAVING clause
         String sortOrder = FPDataEntry.COLUMN_NAME_FPTAG + " DESC";
@@ -311,8 +314,8 @@ public class DataHelper extends SQLiteOpenHelper {
                 TestDataEntry.COLUMN_NAME_RSSI
         };
 
-        String selection = TestDataEntry.COLUMN_NAME_FPTAG+"=?";
-        String selectionArgs[] = {tag};
+        String selection = TestDataEntry.COLUMN_NAME_FPTAG+"=? AND "+TestDataEntry.COLUMN_NAME_Z + "<? ";
+        String selectionArgs[] = {tag, "2"};
 
         String groupBy = null;
         String filter = null; // HAVING clause
@@ -344,8 +347,8 @@ public class DataHelper extends SQLiteOpenHelper {
                 TestDataEntry.COLUMN_NAME_Y,
                 TestDataEntry.COLUMN_NAME_Z
         };
-        String selection = "";
-        String selectionArgs[] = {};
+        String selection = TestDataEntry.COLUMN_NAME_Z + "=? ";
+        String selectionArgs[] = {"1.6"};
         String groupBy = null;
         String filter = null; // HAVING clause
         String sortOrder = TestDataEntry.COLUMN_NAME_FPTAG + " DESC";
@@ -375,5 +378,68 @@ public class DataHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = this.getWritableDatabase();
         db.execSQL("delete from "+ FPDataEntry.TABLE_NAME);
         db.execSQL("delete from "+ TestDataEntry.TABLE_NAME);
+    }
+
+    public void fix(){
+        moveTable("08600.03000.00130");
+        moveTable("08600.03000.00120");
+        moveTable("07400.03200.00110");
+
+        deleteRP("07600.03000.00120");
+
+        updateFPDataEntry();
+    }
+
+    // move from RP table to test table
+    public void moveTable(String tag){
+
+        Cursor c = GetFingerprintByTag(tag);
+
+        Fingerprint fp = new Fingerprint(c);
+
+        AddTestFP(fp);
+
+        deleteRP(tag);
+
+    }
+
+    public void deleteRP(String tag){
+        SQLiteDatabase db = this.getWritableDatabase();
+        // Define 'where' part of query.
+        String selection = FPDataEntry.COLUMN_NAME_FPTAG + " LIKE ?";
+        // Specify arguments in placeholder order.
+        String[] selectionArgs = { String.valueOf(tag) };
+        // Issue SQL statement.
+        db.delete(FPDataEntry.TABLE_NAME, selection, selectionArgs);
+    }
+
+    public void deleteTestPoint(String tag){
+        SQLiteDatabase db = this.getWritableDatabase();
+        // Define 'where' part of query.
+        String selection = TestDataEntry.COLUMN_NAME_FPTAG + " LIKE ?";
+        // Specify arguments in placeholder order.
+        String[] selectionArgs = { String.valueOf(tag) };
+        // Issue SQL statement.
+        db.delete(TestDataEntry.TABLE_NAME, selection, selectionArgs);
+    }
+
+    public void updateFPDataEntry(){
+        SQLiteDatabase db = this.getReadableDatabase();
+
+        // New value for one column
+        ContentValues values = new ContentValues();
+        values.put(FPDataEntry.COLUMN_NAME_FPTAG, "08000.03200.00100");
+        values.put(FPDataEntry.COLUMN_NAME_Y, 32.0);
+
+
+        // Which row to update, based on the ID
+        String selection = FPDataEntry.COLUMN_NAME_FPTAG + " LIKE ?";
+        String[] selectionArgs = { String.valueOf("08000.03600.00100") };
+
+        int count = db.update(
+                FPDataEntry.TABLE_NAME,
+                values,
+                selection,
+                selectionArgs);
     }
 }
